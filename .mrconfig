@@ -1,0 +1,17 @@
+[dotfiles]
+checkout =
+   git clone git@github.com:lenzomj/dotfiles.git
+   cd dotfiles
+   git remote add proxy ../proxy/dotfiles.git
+
+[submodules/fonts]
+checkout =
+   git clone git@github.com:powerline/fonts.git
+   cd fonts
+   git remote add proxy ../../proxy/fonts.git
+
+[submodules/Vundle.vim]
+checkout =
+   git clone git@github.com:VundleVim/Vundle.vim.git
+   cd Vundle.vim
+   git remote add proxy ../../proxy/Vundle.vim.git
