@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+usage() {
+  cat <<EOM
+  Usage: `basename $0` [mirror]
+    Options:
+    - get: Something
+EOM
+  exit 0
+}
+update() {
+   repo=${1##*/}
+   pushd mirror/$repo &> /dev/null;
+      git remote update
+   popd &> /dev/null;
+}
+
+mirror() {
+   repo=${1##*/}
+   pushd mirror &> /dev/null;
+      [[ -d $repo ]] || \
+      git clone --mirror $1
+   popd &> /dev/null;
+}
+
+[ -z $1 ] && { usage; }
+
+repos=( "git@github.com:lenzomj/dotfiles.git"
+        "git@github.com:VundleVim/Vundle.vim.git"
+        "git@github.com:powerline/fonts.git" 
+        "git@github.com:scrooloose/nerdtree.git"
+        "git@github.com:rking/ag.vim.git"
+        "git@github.com:davidhalter/jedi-vim.git"
+        "git@github.com:majutsushi/tagbar.git"
+        "git@github.com:kien/ctrlp.vim.git"
+        "git@github.com:/ajh17/VimCompletesMe.git"
+        "git@github.com:pseewald/vim-anyfold.git" 
+        "git@github.com:vim-airline/vim-airline.git"
+        "git@github.com:vim-airline/vim-airline-themes.git"
+        "git@github.com:flazz/vim-colorschemes.git"
+        "git@github.com:godlygeek/tabular.git"
+        "git@github.com:plasticboy/vim-markdown.git"
+        "git@github.com:airblade/vim-gitgutter.git" )
+
+if [ "$1" == "init" ]; then
+   for repo in ${repos[@]}; do
+      mirror $repo
+   done
+   if [[ ! -d dotfiles ]]; then
+      git clone mirror/dotfiles.git
+      cd dotfiles
+      git submodule update --recursive --init
+      git remote add upstream git@github.com:lenzomj/dotfiles.git
+   fi
+elif [ "$1" == "update" ]; then
+   for repo in ${repos[@]}; do
+      update $repo
+   done
+fi
