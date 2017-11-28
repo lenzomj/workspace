@@ -27,14 +27,14 @@ mirror() {
 
 repos=( "git@github.com:lenzomj/dotfiles.git"
         "git@github.com:VundleVim/Vundle.vim.git"
-        "git@github.com:powerline/fonts.git" 
+        "git@github.com:powerline/fonts.git"
         "git@github.com:scrooloose/nerdtree.git"
         "git@github.com:rking/ag.vim.git"
         "git@github.com:davidhalter/jedi-vim.git"
         "git@github.com:majutsushi/tagbar.git"
         "git@github.com:kien/ctrlp.vim.git"
         "git@github.com:/ajh17/VimCompletesMe.git"
-        "git@github.com:pseewald/vim-anyfold.git" 
+        "git@github.com:pseewald/vim-anyfold.git"
         "git@github.com:vim-airline/vim-airline.git"
         "git@github.com:vim-airline/vim-airline-themes.git"
         "git@github.com:flazz/vim-colorschemes.git"
@@ -43,6 +43,7 @@ repos=( "git@github.com:lenzomj/dotfiles.git"
         "git@github.com:airblade/vim-gitgutter.git" )
 
 if [ "$1" == "init" ]; then
+   [[ -d mirror ]] || mkdir mirror
    for repo in ${repos[@]}; do
       mirror $repo
    done
