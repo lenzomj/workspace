@@ -4,23 +4,6 @@ mirror=mirror
 mirror_git=$mirror/git
 mirror_debian=$mirror/debian
 
-repos=( "git@github.com:lenzomj/workspace.git"
-        "git@github.com:lenzomj/dotfiles.git"
-        "git@github.com:VundleVim/Vundle.vim.git"
-        "git@github.com:powerline/fonts.git"
-        "git@github.com:scrooloose/nerdtree.git"
-        "git@github.com:rking/ag.vim.git"
-        "git@github.com:majutsushi/tagbar.git"
-        "git@github.com:kien/ctrlp.vim.git"
-        "git@github.com:ajh17/VimCompletesMe.git"
-        "git@github.com:pseewald/vim-anyfold.git"
-        "git@github.com:vim-airline/vim-airline.git"
-        "git@github.com:vim-airline/vim-airline-themes.git"
-        "git@github.com:flazz/vim-colorschemes.git"
-        "git@github.com:godlygeek/tabular.git"
-        "git@github.com:plasticboy/vim-markdown.git"
-        "git@github.com:airblade/vim-gitgutter.git" )
-
 usage() {
   cat <<EOM
   Usage: `basename $0` [mirror]
@@ -31,31 +14,38 @@ EOM
 }
 
 update_repos() {
-  args=("$@")
+  args=()
 
-  repos_dst=$mirror/git
+  if [[ -f $1 ]]; then
+    while read line
+    do
+      args+=("$line")
+    done < $1
+  fi
 
-  [[ -d $mirror_git ]] || mkdir -p $mirror_git
-
-  for repo in "${args[@]}"; do
-    if [[ ! -d $mirror_git/${repo##*/} ]]; then
-      pushd $mirror_git &> /dev/null;
-        git clone --mirror $repo
-      popd &> /dev/null;
+  cwd=$(pwd)
+  for line in "${args[@]}"; do
+    if [[ $line == \#* ]]; then
+      : # noop
+    elif [[ $line == dir\:* ]]; then
+      cwd=${line##*:}
+      [[ -d $cwd ]] || mkdir -p $cwd
+    elif [[ ! -d $cwd/${line##*/} ]]; then
+      git clone --mirror $line $cwd/${line##*/}
     else
-      pushd $mirror_git/${repo##*/} &> /dev/null;
-        git remote update
+      pushd $cwd/${line##*/} &> /dev/null;
+        git remote update;
       popd &> /dev/null;
     fi
   done
 
-  if [[ ! -d dotfiles ]]; then
-    git clone $mirror_git/dotfiles.git
-    pushd dotfiles &> /dev/null;
-      git submodule update --recursive --init
-      git remote add upstream "git@github.com:lenzomj/dotfiles.git"
-    popd &> /dev/null;
-  fi
+  #if [[ ! -d dotfiles ]]; then
+  #  git clone $mirror_git/dotfiles.git
+  #  pushd dotfiles &> /dev/null;
+  #    git submodule update --recursive --init
+  #    git remote add upstream "git@github.com:lenzomj/dotfiles.git"
+  #  popd &> /dev/null;
+  #fi
 }
 
 update_system() {
@@ -83,7 +73,7 @@ pull_from() {
 [ -z $1 ] && { usage; }
 
 if [ "$1" == "update" ]; then
-  update_repos "${repos[@]}"
+  update_repos repolists/base
   #update_system
 elif [ "$1" == "push" ]; then
   push_to $2

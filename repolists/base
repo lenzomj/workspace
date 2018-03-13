@@ -1,0 +1,17 @@
+# Includes base workspace repositories
+dir:mirror/git/base
+git@github.com:lenzomj/workspace.git
+git@github.com:lenzomj/dotfiles.git
+git@github.com:VundleVim/Vundle.vim.git
+git@github.com:powerline/fonts.git
+git@github.com:scrooloose/nerdtree.git
+git@github.com:rking/ag.vim.git
+git@github.com:majutsushi/tagbar.git
+git@github.com:kien/ctrlp.vim.git
+git@github.com:pseewald/vim-anyfold.git
+git@github.com:vim-airline/vim-airline.git
+git@github.com:vim-airline/vim-airline-themes.git
+git@github.com:flazz/vim-colorschemes.git
+git@github.com:godlygeek/tabular.git
+git@github.com:plasticboy/vim-markdown.git
+git@github.com:airblade/vim-gitgutter.git
