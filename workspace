@@ -38,14 +38,16 @@ update_repos() {
       popd &> /dev/null;
     fi
   done
+}
 
-  #if [[ ! -d dotfiles ]]; then
-  #  git clone $mirror_git/dotfiles.git
-  #  pushd dotfiles &> /dev/null;
-  #    git submodule update --recursive --init
-  #    git remote add upstream "git@github.com:lenzomj/dotfiles.git"
-  #  popd &> /dev/null;
-  #fi
+initialize() {
+  if [[ ! -d dotfiles ]]; then
+    git clone mirror/git/base/dotfiles.git
+    pushd dotfiles &> /dev/null;
+      git submodule update --recursive --init
+      git remote add upstream "git@github.com:lenzomj/dotfiles.git"
+    popd &> /dev/null;
+  fi
 }
 
 update_system() {
@@ -79,4 +81,6 @@ elif [ "$1" == "push" ]; then
   push_to $2
 elif [ "$1" == "pull" ]; then
   pull_from $2
+elif [ "$1" == "init" ]; then
+  initialize
 fi
