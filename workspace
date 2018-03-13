@@ -6,9 +6,12 @@ mirror_debian=$mirror/debian
 
 usage() {
   cat <<EOM
-  Usage: `basename $0` [mirror]
-    Options:
-    - get: Something
+  Usage: `basename $0` [command] [arg(s)]
+    Commands:
+    - update [repolist]: Updates the repositories specified in [repolist]
+    - init: Initializes the workspace by cloning dotfiles from mirror/git
+    - push [remote]: Synchronizes [remote] from local mirror
+    - pull [remote]: Synchronizes local mirror from [remote]
 EOM
   exit 0
 }
@@ -72,11 +75,11 @@ pull_from() {
     rsync --update --delete --progress -r $1/$mirror .
 }
 
-[ -z $1 ] && { usage; }
+[ "$#" -ge 1 ] || { usage; }
 
 if [ "$1" == "update" ]; then
-  update_repos repolists/base
-  #update_system
+  [ "$#" -ge 2 ] || { usage; }
+  update_repos repolists/$2
 elif [ "$1" == "push" ]; then
   push_to $2
 elif [ "$1" == "pull" ]; then
