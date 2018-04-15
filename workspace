@@ -7,7 +7,7 @@ usage() {
   cat <<EOM
   Usage: `basename $0` <command> [arg(s)]
     Commands:
-    - update [repolist]: Updates the repositories specified in [repolist]
+    - mirror [repolist]: Mirrors the repositories specified in [repolist]
     - init: Initializes the workspace by cloning dotfiles from mirror/git
     - push [dir] <remote>: Push mirror/[dir] to <remote>/mirror
     - pull [dir] <remote>: Pull <remote>/mirror/[dir] to mirror
@@ -15,7 +15,7 @@ EOM
   exit 0
 }
 
-update_repos() {
+mirror() {
   args=()
 
   if [[ -f $1 ]]; then
@@ -32,11 +32,23 @@ update_repos() {
     elif [[ $line == dir\:* ]]; then
       cwd=${line##*:}
       [[ -d $cwd ]] || mkdir -p $cwd
-    elif [[ ! -d $cwd/${line##*/} ]]; then
-      git clone --mirror $line $cwd/${line##*/}
-    else
-      pushd $cwd/${line##*/} &> /dev/null;
-        git remote update;
+    elif [[ $line == repo\:* ]]; then
+      repo_remote=${line#*:}
+      repo_local=${line##*/}
+      if [[ ! -d $cwd/$repo_local ]]; then
+        git clone --mirror $repo_remote $cwd/$repo_local
+      else
+        pushd $cwd/$repo_local &> /dev/null;
+          echo "Fetching $repo_remote ..."
+          git remote update &> /dev/null;
+        popd &> /dev/null;
+      fi
+    elif [[ $line == file\:* ]]; then
+      file_remote=${line#*:}
+      file_local=${line##*/}
+      pushd $cwd &> /dev/null;
+        echo "Downloading $file_remote"
+        curl $file_remote --output $file_local
       popd &> /dev/null;
     fi
   done
@@ -63,17 +75,6 @@ initialize() {
   fi
 }
 
-update_system() {
-  system_files=( "http://database.clamav.net/daily.cvd" )
-
-  system_dst=mirror/debian
-
-  [[ -d $system_dst ]] || mkdir -p $system_dst
-
-  for file in ${system_files[@]}; do
-    curl $file --output $system_dst/${file##*/}
-  done
-}
 
 sync() {
   src=$1
@@ -91,9 +92,9 @@ pull_from() {
 
 [[ "$#" -ge 1 ]] || { usage; }
 
-if [ "$1" == "update" ]; then
+if [ "$1" == "mirror" ]; then
   [[ "$#" -ge 2 ]] || { usage; }
-  update_repos repolists/$2
+  mirror repolists/$2
 elif [ "$1" == "push" ]; then
   if [[ "$#" -eq 2 ]]; then
     sync mirror $2
