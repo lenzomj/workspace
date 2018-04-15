@@ -43,12 +43,16 @@ mirror() {
           git remote update &> /dev/null;
         popd &> /dev/null;
       fi
-    elif [[ $line == uri\:* ]]; then
+    elif [[ $line == uri*\:* ]]; then
       file_remote=${line#*:}
       file_local=${line##*/}
       pushd $cwd &> /dev/null;
-        echo "Downloading $file_remote"
-        curl $file_remote --output $file_local
+        if [[ ( $line == uri!\:* ) || ( ! -f $file_local ) ]]; then
+          echo "Downloading $file_remote"
+          curl -L $file_remote --output $file_local
+        else
+          echo "Skipping $file_remote ..."
+        fi
       popd &> /dev/null;
     elif [[ $line == pip\:* ]]; then
       pip_cmd=${line#*:}
