@@ -1,3 +1,4 @@
 dotfiles/*
 mirror/*
 repolists/*
+.DS_Store

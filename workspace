@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 
-mirror=mirror
-mirror_git=$mirror/git
-mirror_debian=$mirror/debian
+workspace=$HOME/workspace
+dotfiles=$HOME/workspace/dotfiles
 
 usage() {
   cat <<EOM
-  Usage: `basename $0` [command] [arg(s)]
+  Usage: `basename $0` <command> [arg(s)]
     Commands:
     - update [repolist]: Updates the repositories specified in [repolist]
     - init: Initializes the workspace by cloning dotfiles from mirror/git
-    - push [remote]: Synchronizes [remote] from local mirror
-    - pull [remote]: Synchronizes local mirror from [remote]
+    - push [dir] <remote>: Push mirror/[dir] to <remote>/mirror
+    - pull [dir] <remote>: Pull <remote>/mirror/[dir] to mirror
 EOM
   exit 0
 }
@@ -50,13 +49,24 @@ initialize() {
       git submodule update --recursive --init
       git remote add upstream "git@github.com:lenzomj/dotfiles.git"
     popd &> /dev/null;
+  else
+    [[ -e $HOME/.vim ]]   || ln -s $dotfiles/vim.d $HOME/.vim
+    [[ -e $HOME/.vimrc ]] || ln -s $dotfiles/common.vimrc $HOME/.vimrc
+    [[ -e $HOME/.gitconfig ]] || \
+      ln -s $dotfiles/common.gitconfig $HOME/.gitconfig
+    [[ -e $HOME/.bashrc ]] || ln -s $dotfiles/common.bashrc $HOME/.bashrc
+    [[ -e $HOME/.bash_profile ]] || \
+      ln -s $dotfiles/common.bash_profile $HOME/.bash_profile
+    [[ -e $HOME/.fonts ]] || ln -s $dotfiles/fonts $HOME/.fonts
+    [[ ! `command -v fc-cache` ]] || fc-cache -vf $HOME/.fonts
+    [[ ! `command -v vim` ]] || vim +PluginInstall +qall
   fi
 }
 
 update_system() {
   system_files=( "http://database.clamav.net/daily.cvd" )
 
-  system_dst=$mirror/debian
+  system_dst=mirror/debian
 
   [[ -d $system_dst ]] || mkdir -p $system_dst
 
@@ -65,25 +75,37 @@ update_system() {
   done
 }
 
-push_to() {
-  [[ -d $1 ]] && \
-    rsync --update --delete --progress -r $mirror $1
+sync() {
+  src=$1
+  dst=$2
+  echo "Syncing $1 -> $2"
+  [[ -d $dst ]] || mkdir -p $dst &> /dev/null
+  [[ -d $src ]] && \
+    rsync --update --delete --progress -r $src $dst
 }
 
 pull_from() {
-  [[ -d $1 ]] && \
-    rsync --update --delete --progress -r $1/$mirror .
+  [[ -d $1 && -d $2 ]] && \
+    rsync --update --delete --progress -r $2/mirror .
 }
 
-[ "$#" -ge 1 ] || { usage; }
+[[ "$#" -ge 1 ]] || { usage; }
 
 if [ "$1" == "update" ]; then
-  [ "$#" -ge 2 ] || { usage; }
+  [[ "$#" -ge 2 ]] || { usage; }
   update_repos repolists/$2
 elif [ "$1" == "push" ]; then
-  push_to $2
+  if [[ "$#" -eq 2 ]]; then
+    sync mirror $2
+  elif [[ "$#" -eq 3 ]]; then
+    sync mirror/$2 $3/mirror/$(dirname "$2")
+  fi
 elif [ "$1" == "pull" ]; then
-  pull_from $2
+  if [[ "$#" -eq 2 ]]; then
+    sync $2/mirror .
+  elif [[ "$#" -eq 3 ]]; then
+    sync $3/mirror/$2 mirror/$(dirname "$2")
+  fi
 elif [ "$1" == "init" ]; then
   initialize
 fi
