@@ -2,6 +2,7 @@
 
 workspace=$HOME/workspace
 dotfiles=$HOME/workspace/dotfiles
+mirror=$HOME/workspace/mirror
 
 usage() {
   cat <<EOM
@@ -13,6 +14,19 @@ usage() {
     - pull [dir] <remote>: Pull <remote>/mirror/[dir] to mirror
 EOM
   exit 0
+}
+
+patch() {
+  mkdir -p $mirror/patches &> /dev/null;
+  branches=()
+  pushd $1 &> /dev/null;
+    eval "$(git for-each-ref --shell --format='branches+=(%(refname))' refs/heads/)"
+    for branch in "${branches[@]}"; do
+        git checkout ${branch##*/}
+        git format-patch master --stdout > \
+          $mirror/patches/$1.${branch##*/}.patch
+    done
+  popd &> /dev/null;
 }
 
 mirror() {
@@ -110,4 +124,7 @@ elif [ "$1" == "pull" ]; then
   fi
 elif [ "$1" == "init" ]; then
   initialize
+elif [ "$1" == "patch" ]; then
+  [[ "$#" -ge 2 ]] || { usage; }
+  patch $2
 fi
