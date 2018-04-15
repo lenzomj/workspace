@@ -15,3 +15,6 @@ git:git@github.com:flazz/vim-colorschemes.git
 git:git@github.com:godlygeek/tabular.git
 git:git@github.com:plasticboy/vim-markdown.git
 git:git@github.com:airblade/vim-gitgutter.git
+dir:mirror/pip/base
+pip:sphinx
+pip:sphinx_rtd_theme
