@@ -32,7 +32,7 @@ mirror() {
     elif [[ $line == dir\:* ]]; then
       cwd=${line##*:}
       [[ -d $cwd ]] || mkdir -p $cwd
-    elif [[ $line == repo\:* ]]; then
+    elif [[ $line == git\:* ]]; then
       repo_remote=${line#*:}
       repo_local=${line##*/}
       if [[ ! -d $cwd/$repo_local ]]; then
@@ -43,13 +43,16 @@ mirror() {
           git remote update &> /dev/null;
         popd &> /dev/null;
       fi
-    elif [[ $line == file\:* ]]; then
+    elif [[ $line == uri\:* ]]; then
       file_remote=${line#*:}
       file_local=${line##*/}
       pushd $cwd &> /dev/null;
         echo "Downloading $file_remote"
         curl $file_remote --output $file_local
       popd &> /dev/null;
+    elif [[ $line == pip\:* ]]; then
+      pip_cmd=${line#*:}
+      pip3 download --dest $cwd $pip_cmd
     fi
   done
 }
@@ -75,7 +78,6 @@ initialize() {
   fi
 }
 
-
 sync() {
   src=$1
   dst=$2
@@ -83,11 +85,6 @@ sync() {
   [[ -d $dst ]] || mkdir -p $dst &> /dev/null
   [[ -d $src ]] && \
     rsync --update --delete --progress -r $src $dst
-}
-
-pull_from() {
-  [[ -d $1 && -d $2 ]] && \
-    rsync --update --delete --progress -r $2/mirror .
 }
 
 [[ "$#" -ge 1 ]] || { usage; }

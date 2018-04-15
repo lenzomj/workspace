@@ -1,2 +1,2 @@
 dir:mirror/debian/clamav
-file:http://database.clamav.net/daily.cvd
+uri:http://database.clamav.net/daily.cvd
