@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 
-workspace=$HOME/workspace
-dotfiles=$HOME/workspace/dotfiles
-mirror=$HOME/workspace/mirror
+WORKSPACE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source "${WORKSPACE_DIR}/scripts/dotfiles.sh"
+source "${WORKSPACE_DIR}/scripts/homebrew.sh"
+source "${WORKSPACE_DIR}/scripts/parse.sh"
+#source "${WORKSPACE_DIR}/scripts/setup.sh"
+
+if [[ ! -f "${HOME}/.workspace.conf" ]]; then
+  setup_env "${WORKSPACE_DIR}" "${HOME}"
+fi
+
+source "${HOME}/.workspace.conf"
 
 usage() {
   cat <<EOM
   Usage: `basename $0` <command> [arg(s)]
     Commands:
-    - mirror [repolist]: Mirrors the repositories specified in [repolist]
-    - init: Initializes the workspace by cloning dotfiles from mirror/git
-    - push [dir] <remote>: Push mirror/[dir] to <remote>/mirror
-    - pull [dir] <remote>: Pull <remote>/mirror/[dir] to mirror
+    - update [repolist]: Updates the repositories specified in [repolist]
+    - export: Exports local mirror to offline mirror
+              -Local:   ${WORKSPACE_MIRROR}
+              -Offline: $WORKSPACE_OFFLINE_MIRROR
+    - setup: Initializes the workspace by cloning dotfiles from mirror/git
 EOM
   exit 0
 }
@@ -29,101 +38,27 @@ patch() {
   popd &> /dev/null;
 }
 
-mirror() {
-  args=()
-
-  if [[ -f $1 ]]; then
-    while read line
-    do
-      args+=("$line")
-    done < $1
-  fi
-
-  cwd=$(pwd)
-  for line in "${args[@]}"; do
-    if [[ $line == \#* ]]; then
-      : # noop
-    elif [[ $line == dir\:* ]]; then
-      cwd=${line##*:}
-      [[ -d $cwd ]] || mkdir -p $cwd
-    elif [[ $line == git\:* ]]; then
-      repo_remote=${line#*:}
-      repo_local=${line##*/}
-      if [[ ! -d $cwd/$repo_local ]]; then
-        git clone --mirror $repo_remote $cwd/$repo_local
-      else
-        pushd $cwd/$repo_local &> /dev/null;
-          echo "Fetching $repo_remote ..."
-          git remote update &> /dev/null;
-        popd &> /dev/null;
-      fi
-    elif [[ $line == uri*\:* ]]; then
-      file_remote=${line#*:}
-      file_local=${line##*/}
-      pushd $cwd &> /dev/null;
-        if [[ ( $line == uri!\:* ) || ( ! -f $file_local ) ]]; then
-          echo "Downloading $file_remote"
-          curl -L $file_remote --output $file_local
-        else
-          echo "Skipping $file_remote ..."
-        fi
-      popd &> /dev/null;
-    elif [[ $line == pip\:* ]]; then
-      pip_cmd=${line#*:}
-      pip3 download --dest $cwd $pip_cmd
-    fi
-  done
-}
-
-initialize() {
-  if [[ ! -d dotfiles ]]; then
-    git clone mirror/git/base/dotfiles.git
-    pushd dotfiles &> /dev/null;
-      git submodule update --recursive --init
-      git remote add upstream "git@github.com:lenzomj/dotfiles.git"
-    popd &> /dev/null;
-  else
-    [[ -e $HOME/.vim ]]   || ln -s $dotfiles/vim.d $HOME/.vim
-    [[ -e $HOME/.vimrc ]] || ln -s $dotfiles/common.vimrc $HOME/.vimrc
-    [[ -e $HOME/.gitconfig ]] || \
-      ln -s $dotfiles/common.gitconfig $HOME/.gitconfig
-    [[ -e $HOME/.bashrc ]] || ln -s $dotfiles/common.bashrc $HOME/.bashrc
-    [[ -e $HOME/.bash_profile ]] || \
-      ln -s $dotfiles/common.bash_profile $HOME/.bash_profile
-    [[ -e $HOME/.fonts ]] || ln -s $dotfiles/fonts $HOME/.fonts
-    [[ ! `command -v fc-cache` ]] || fc-cache -vf $HOME/.fonts
-    [[ ! `command -v vim` ]] || vim +PluginInstall +qall
-  fi
-}
-
-sync() {
-  src=$1
-  dst=$2
-  echo "Syncing $1 -> $2"
-  [[ -d $dst ]] || mkdir -p $dst &> /dev/null
-  [[ -d $src ]] && \
-    rsync --update --delete --progress -r $src $dst
-}
-
+#
+# Check arguments
+#
 [[ "$#" -ge 1 ]] || { usage; }
 
-if [ "$1" == "mirror" ]; then
-  [[ "$#" -ge 2 ]] || { usage; }
-  mirror repolists/$2
-elif [ "$1" == "push" ]; then
-  if [[ "$#" -eq 2 ]]; then
-    sync mirror $2
-  elif [[ "$#" -eq 3 ]]; then
-    sync mirror/$2 $3/mirror/$(dirname "$2")
+if [ "$1" == "update" ]; then
+  if [ "$#" -ge 2 ]; then
+    parse_file manifest/$2
+  else
+    parse_file manifest/base
   fi
-elif [ "$1" == "pull" ]; then
-  if [[ "$#" -eq 2 ]]; then
-    sync $2/mirror .
-  elif [[ "$#" -eq 3 ]]; then
-    sync $3/mirror/$2 mirror/$(dirname "$2")
+elif [ "$1" == "export" ]; then
+  sync ${WORKSPACE_MIRROR} ${WORKSPACE_OFFLINE_MIRROR}
+elif [ "$1" == "setup" ]; then
+  if [ "$#" -ge 2 ]; then
+    eval "setup_$2"
   fi
-elif [ "$1" == "init" ]; then
-  initialize
+elif [ "$1" == "clean" ]; then
+  if [ "$#" -ge 2 ]; then
+    eval "clean_$2"
+  fi
 elif [ "$1" == "patch" ]; then
   [[ "$#" -ge 2 ]] || { usage; }
   patch $2

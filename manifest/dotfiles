@@ -1,0 +1,16 @@
+#
+# Dotfiles
+#
+
+with:${WORKSPACE_MIRROR}/github
+   github:lenzomj/dotfiles.git
+   github:ctrlpvim/ctrlp.vim.git
+   github:itchyny/lightline.vim.git
+   github:preservim/nerdtree.git
+   github:godlygeek/tabular.git
+   github:pseewald/vim-anyfold.git
+   github:flazz/vim-colorschemes.git
+   github:airblade/vim-gitgutter.git
+   github:plasticboy/vim-markdown.git
+   github:reedes/vim-pencil.git
+end
