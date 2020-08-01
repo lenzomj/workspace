@@ -1,4 +1,6 @@
 dotfiles/*
+fonts/*
+homebrew
 mirror/*
 repolists/*
 .DS_Store

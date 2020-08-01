@@ -1,4 +1,0 @@
-dir:mirror/debian/clamav
-uri:http://database.clamav.net/daily.cvd
-dir:mirror/debian/boxes/stretch64/versions/9.4.0
-uri:https://app.vagrantup.com/debian/boxes/stretch64/versions/9.4.0/providers/virtualbox.box

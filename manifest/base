@@ -1,0 +1,7 @@
+#
+# Base
+#
+
+with:${WORKSPACE_MIRROR}/github
+   github:lenzomj/workspace.git
+end
