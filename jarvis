@@ -1,0 +1,95 @@
+#!/usr/bin/env python2
+#vi: set ft=python
+
+import argparse
+import os.path
+import sys
+import shlex
+import subprocess
+import urlparse
+
+def handle_with(key, args):
+    return ["pushd '{0}' >/dev/null;".format(args)]
+
+def handle_end(key, args):
+    return ["popd &> /dev/null;"]
+
+def handle_git(key, args):
+    cmd = """
+    if [[ ! -d {local} ]]; then
+      echo "Mirroring {remote} ..." >&2
+      git clone --mirror {remote} {local}
+    else
+      pushd {local} &> /dev/null;
+        echo "Updating {local} ..." >&2
+        git remote update
+      popd &> /dev/null;
+    fi
+    """
+    local = ""
+    remote = ""
+    if key == 'github':
+        remote = "https://github.com/{0}".format(args)
+        local = args
+    else:
+        url = urlparse.urlsplit(args)
+        remote = args
+        local = url.path.lstrip('/')
+    return [cmd.format(local=local, remote=remote)]
+
+def translate(directive):
+    handlers = { 'with'   : handle_with,
+                 'end'    : handle_end,
+                 'github' : handle_git,
+                 'git'    : handle_git }
+    if len(directive) == 1:
+        directive.append(None)
+    key, args = directive
+    key.lower()
+    return handlers[key](key, args)
+
+def read_manifest(filestream):
+    script = []
+    lex = shlex.shlex(filestream, posix=True)
+    lex.whitespace_split = True
+    token = ""
+    for token in lex:
+        token = os.path.expandvars(token)
+        directive = token.split(':', 1)
+        script.extend(translate(directive))
+    return script
+
+def open_manifests(filenames):
+    manifest_dir = os.path.dirname(os.path.realpath(__file__))
+    manifest_dir = os.path.join(manifest_dir, 'manifest')
+    for filename in filenames:
+        manifest_path = os.path.join(manifest_dir, filename)
+        if not os.path.exists(manifest_path):
+            sys.stderr.write("Error: {0} does not exist\n".format(filename))
+        else:
+            with open(manifest_path) as f:
+                script = '\n'.join(read_manifest(f))
+                print script
+                p = subprocess.Popen(script,
+                                 executable='/bin/bash',
+                                 shell=True,
+                                 stderr=subprocess.PIPE,
+                                 stdout=subprocess.PIPE)
+                rc = p.wait()
+                for line in p.stdout:
+                    print line.rstrip()
+                for line in p.stderr:
+                    print line.rstrip()
+
+def prompt():
+    parser = argparse.ArgumentParser(description="J.A.R.V.I.S")
+    parser.add_argument('--update',
+                        nargs='*', metavar='manifest', help='Update manifests')
+    args = parser.parse_args()
+    if args.update is not None and len(args.update) > 0:
+        open_manifests(args.update)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    prompt()
