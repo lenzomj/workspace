@@ -2,18 +2,12 @@
 # System
 #
 
-with:${WORKSPACE_MIRROR}/centos
+with:${WORKSPACE_MIRROR}/system
    rsync:rsync://mirror.cs.pitt.edu/centos/RPM-GPG-KEY-CentOS-7
-   with:${WORKSPACE_MIRROR}/centos/7
-      rsync:rsync://mirror.cs.pitt.edu/centos/7/os
-      rsync:rsync://mirror.cs.pitt.edu/centos/7/updates
-      rsync:rsync://mirror.cs.pitt.edu/centos/7/extras
-   end
-end
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/updates/
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/extras/
 
-with:${WORKSPACE_MIRROR}/epel
    rsync:rsync://mirror.cs.pitt.edu/fedora-epel/RPM-GPG-KEY-EPEL-7
-   with:${WORKSPACE_MIRROR}/epel/7
-      rsync:--exclude=debug --exclude=drpms rsync://mirror.cs.pitt.edu/fedora-epel/7/x86_64
-   end
+   rsync:"--exclude=debug --exclude=drpms rsync://mirror.cs.pitt.edu/fedora-epel/7/x86_64/"
 end
