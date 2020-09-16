@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 #vi: set ft=python
 
+from __future__ import print_function
+
 import argparse
 import os.path
 import sys
@@ -16,11 +18,11 @@ def handle_end(key, args):
 
 def handle_git(key, args):
     cmd = """
-    if [[ ! -d {local} ]]; then
+    if [[ ! -d "{local}" ]]; then
       echo "Mirroring {remote} ..." >&2
-      git clone --mirror {remote} {local}
+      git clone --mirror "{remote}" "{local}"
     else
-      pushd {local} &> /dev/null;
+      pushd "{local}" &> /dev/null;
         echo "Updating {local} ..." >&2
         git remote update
       popd &> /dev/null;
@@ -37,27 +39,65 @@ def handle_git(key, args):
         local = url.path.lstrip('/')
     return [cmd.format(local=local, remote=remote)]
 
+def handle_get(key, args):
+    cmd = """
+    echo "Downloading {remote} ..." >&2
+    curl -# -L "{remote}" -o "{local}"
+    """
+    url = urlparse.urlsplit(args)
+    remote = url.geturl()
+    local = os.path.basename(url.path)
+    return [cmd.format(local=local, remote=remote)]
+
+def handle_rsync(key, args):
+    cmd = """
+    echo "Syncing {remote} ..." >&2
+    rsync -avSHP --delete {flags} {remote} {local} >&2
+    """
+    args = args.split()
+    url = urlparse.urlsplit(args.pop()) # URI is always last
+    remote = url.geturl()
+    local = url.path.lstrip('/')
+    flags = ' '.join(args)
+    return [cmd.format(local=local, remote=remote, flags=flags)]
+
 def translate(directive):
     handlers = { 'with'   : handle_with,
                  'end'    : handle_end,
                  'github' : handle_git,
-                 'git'    : handle_git }
-    if len(directive) == 1:
-        directive.append(None)
-    key, args = directive
-    key.lower()
+                 'git'    : handle_git,
+                 'get'    : handle_get,
+                 'rsync'  : handle_rsync }
+
+    key = directive[0].lower()
+    args = directive[1]
     return handlers[key](key, args)
 
 def read_manifest(filestream):
     script = []
     lex = shlex.shlex(filestream, posix=True)
     lex.whitespace_split = True
-    token = ""
     for token in lex:
         token = os.path.expandvars(token)
         directive = token.split(':', 1)
+        if len(directive) == 1:
+            directive.append(None)
         script.extend(translate(directive))
     return script
+
+def execute(script):
+    p = subprocess.Popen(script,
+                         executable='/bin/bash',
+                         shell=True,
+                         stderr=subprocess.PIPE,
+                         stdout=None)
+
+    for stderr_line in iter(p.stderr.readline, ""):
+        yield stderr_line
+    p.stderr.close()
+    rc = p.wait()
+    if rc:
+        raise subprocess.CalledProcessError(rc, script)
 
 def open_manifests(filenames):
     manifest_dir = os.path.dirname(os.path.realpath(__file__))
@@ -69,17 +109,8 @@ def open_manifests(filenames):
         else:
             with open(manifest_path) as f:
                 script = '\n'.join(read_manifest(f))
-                print script
-                p = subprocess.Popen(script,
-                                 executable='/bin/bash',
-                                 shell=True,
-                                 stderr=subprocess.PIPE,
-                                 stdout=subprocess.PIPE)
-                rc = p.wait()
-                for line in p.stdout:
-                    print line.rstrip()
-                for line in p.stderr:
-                    print line.rstrip()
+                for output in execute(script):
+                    print(output, end="")
 
 def prompt():
     parser = argparse.ArgumentParser(description="J.A.R.V.I.S")
