@@ -2,6 +2,10 @@
 # Base
 #
 
-with:${WORKSPACE_MIRROR}/github
+!config:'# ==== WORKSPACE ===='
+!config:'export WORKSPACE="${HOME}/workspace"'
+!config:'export WORKSPACE_MIRROR="${WORKSPACE}/mirror"'
+
+within:${WORKSPACE_MIRROR}/github
    github:lenzomj/workspace.git
-end
+end_within

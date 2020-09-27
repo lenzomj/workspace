@@ -2,11 +2,24 @@
 # Homebrew
 #
 
-with:${WORKSPACE_MIRROR}/github
+!config:'# ==== HOMEBREW ===='
+!config:'export HOMEBREW_PREFIX="${WORKSPACE}/homebrew"'
+!config:'export HOMEBREW_REPOSITORY="${HOMEBREW_PREFIX}"'
+!config:'export HOMEBREW_CELLAR="${HOMEBREW_PREFIX}/Cellar"'
+!config:'export HOMEBREW_CACHE="${WORKSPACE_MIRROR}/homebrew"'
+!config:'export HOMEBREW_TAP="${HOMEBREW_PREFIX}/Library/Taps/homebrew/homebrew-core"'
+!config:'export PATH="${HOMEBREW_PREFIX}/bin:${HOMEBREW_PREFIX}/sbin${PATH+:$PATH}"'
+!config:'export MANPATH="${HOMEBREW_PREFIX}/share/man${MANPATH+:$MANPATH}:"'
+!config:'export INFOPATH="${HOMEBREW_PREFIX}/share/info:${INFOPATH}"'
+
+with:${HOME}/.workspace.conf
+end_with
+
+within:${WORKSPACE_MIRROR}/github
    github:homebrew/brew.git
    github:lenzomj/linuxbrew-lite.git
-end
+end_within
 
-with:${WORKSPACE_MIRROR}/homebrew
+within:${WORKSPACE_MIRROR}/homebrew
    get:https://linuxbrew.bintray.com/bottles-portable-ruby/portable-ruby-2.6.3_2.x86_64_linux.bottle.tar.gz
-end
+end_within

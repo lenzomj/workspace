@@ -2,7 +2,10 @@
 # Dotfiles
 #
 
-with:${WORKSPACE_MIRROR}/github
+!config:'# ==== DOTFILES ===='
+!config:'export WORKSPACE_DOTFILES="${WORKSPACE}/dotfiles"'
+
+within:${WORKSPACE_MIRROR}/github
    github:lenzomj/dotfiles.git
    github:ctrlpvim/ctrlp.vim.git
    github:itchyny/lightline.vim.git
@@ -13,4 +16,4 @@ with:${WORKSPACE_MIRROR}/github
    github:airblade/vim-gitgutter.git
    github:plasticboy/vim-markdown.git
    github:reedes/vim-pencil.git
-end
+end_within

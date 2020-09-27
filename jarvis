@@ -9,12 +9,47 @@ import sys
 import shlex
 import subprocess
 import urlparse
+import hashlib
+
+def open_configuration(filename):
+    path = os.path.expandvars("${HOME}/.workspace.conf")
+    config = { }
+    if os.path.exists(path):
+        with open(path) as f:
+            line = f.readline()
+            while line:
+                line = line.strip()
+                hashed = hashlib.md5(line)
+                config[hashed.hexdigest()] = line
+                line = f.readline()
+    return config
+
+def handle_within(key, args):
+    cmd =[]
+    if key == 'within':
+        cmd.append("pushd '{0}' >/dev/null;".format(args))
+    elif key == 'end_within':
+        cmd.append("popd &> /dev/null;")
+    return cmd
 
 def handle_with(key, args):
-    return ["pushd '{0}' >/dev/null;".format(args)]
+    cmd=[]
+    if key == 'with':
+        cmd.append("cat >> '{0}' <<'_EOS'".format(args))
+    elif key == 'end_with':
+        cmd.append("_EOS")
+    return cmd
 
-def handle_end(key, args):
-    return ["popd &> /dev/null;"]
+def handle_puts(key, args):
+    return [args]
+
+def handle_config(key, args):
+    cmd=[]
+    hashed = hashlib.md5(args)
+    config = open_configuration(".workspace.conf")
+    if hashed.hexdigest() not in config.keys():
+        cmd.append("echo '{0}' >> ${{HOME}}/.workspace.conf".format(args))
+    return cmd
 
 def handle_git(key, args):
     cmd = """
@@ -62,8 +97,12 @@ def handle_rsync(key, args):
     return [cmd.format(local=local, remote=remote, flags=flags)]
 
 def translate(directive):
-    handlers = { 'with'   : handle_with,
-                 'end'    : handle_end,
+    handlers = { 'within'     : handle_within,
+                 '!config'     : handle_config,
+                 'end_within' : handle_within,
+                 'with'       : handle_with,
+                 'end_with'   : handle_with,
+                 '!puts'   : handle_puts,
                  'github' : handle_git,
                  'git'    : handle_git,
                  'get'    : handle_get,
@@ -78,7 +117,8 @@ def read_manifest(filestream):
     lex = shlex.shlex(filestream, posix=True)
     lex.whitespace_split = True
     for token in lex:
-        token = os.path.expandvars(token)
+        if not token.startswith('!'):
+            token = os.path.expandvars(token)
         directive = token.split(':', 1)
         if len(directive) == 1:
             directive.append(None)
@@ -86,6 +126,7 @@ def read_manifest(filestream):
     return script
 
 def execute(script):
+    print(script)
     p = subprocess.Popen(script,
                          executable='/bin/bash',
                          shell=True,
