@@ -12,9 +12,6 @@
 !config:'export MANPATH="${HOMEBREW_PREFIX}/share/man${MANPATH+:$MANPATH}:"'
 !config:'export INFOPATH="${HOMEBREW_PREFIX}/share/info:${INFOPATH}"'
 
-with:${HOME}/.workspace.conf
-end_with
-
 within:${WORKSPACE_MIRROR}/github
    github:homebrew/brew.git
    github:lenzomj/linuxbrew-lite.git

@@ -5,7 +5,21 @@
 !config:'# ==== WORKSPACE ===='
 !config:'export WORKSPACE="${HOME}/workspace"'
 !config:'export WORKSPACE_MIRROR="${WORKSPACE}/mirror"'
+!config:'export PYPI_MIRROR="${WORKSPACE_MIRROR}/pypi"'
+!config:'export PYTHON_BOOTSTRAP="${WORKSPACE}/bootstrap/python"'
+!config:'export PYTHONPATH="${PYTHON_BOOTSTRAP}:${PYTHONPATH}"'
 
 within:${WORKSPACE_MIRROR}/github
    github:lenzomj/workspace.git
 end_within
+
+#within:${PYPI_MIRROR}
+#   pip:ansible==2.10.0
+#end_within
+
+#within:${PYTHON_BOOTSTRAP}
+#   get:https://bootstrap.pypa.io/get-pip.py
+#end_within
+
+#setup:'python "${PYTHON_BOOTSTRAP}/get-pip.py" --user'
+#setup:'pip install ansible==2.10.0 --user --no-index --find-links "${PYPI_MIRROR}"'

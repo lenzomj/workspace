@@ -11,10 +11,26 @@ import subprocess
 import urlparse
 import hashlib
 
-def open_configuration(filename):
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    END    = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def get_configuration_path():
     path = os.path.expandvars("${HOME}/.workspace.conf")
+    if not os.path.exists(path):
+        return None
+    return path
+
+def open_configuration():
     config = { }
-    if os.path.exists(path):
+    path = get_configuration_path()
+    if path and os.path.exists(path):
         with open(path) as f:
             line = f.readline()
             while line:
@@ -27,7 +43,8 @@ def open_configuration(filename):
 def handle_within(key, args):
     cmd =[]
     if key == 'within':
-        cmd.append("pushd '{0}' >/dev/null;".format(args))
+        cmd.append("[[ -d \"{0}\" ]] || mkdir -p \"{0}\"".format(args))
+        cmd.append("pushd \"{0}\" >/dev/null;".format(args))
     elif key == 'end_within':
         cmd.append("popd &> /dev/null;")
     return cmd
@@ -43,19 +60,29 @@ def handle_with(key, args):
 def handle_puts(key, args):
     return [args]
 
+def handle_setup(key, args):
+    return [args]
+
 def handle_config(key, args):
     cmd=[]
     hashed = hashlib.md5(args)
-    config = open_configuration(".workspace.conf")
+    config = open_configuration()
     if hashed.hexdigest() not in config.keys():
         cmd.append("echo '{0}' >> ${{HOME}}/.workspace.conf".format(args))
     return cmd
+
+def handle_pip(key, args):
+    cmd = """
+    pip download {package}
+    """
+    package = args
+    return [cmd.format(package=package)]
 
 def handle_git(key, args):
     cmd = """
     if [[ ! -d "{local}" ]]; then
       echo "Mirroring {remote} ..." >&2
-      git clone --mirror "{remote}" "{local}"
+      git clone --mirror --recursive "{remote}" "{local}"
     else
       pushd "{local}" &> /dev/null;
         echo "Updating {local} ..." >&2
@@ -96,23 +123,31 @@ def handle_rsync(key, args):
     flags = ' '.join(args)
     return [cmd.format(local=local, remote=remote, flags=flags)]
 
-def translate(directive):
+def translate(directive, config=False):
     handlers = { 'within'     : handle_within,
-                 '!config'     : handle_config,
+                 '!config'    : handle_config,
                  'end_within' : handle_within,
                  'with'       : handle_with,
                  'end_with'   : handle_with,
-                 '!puts'   : handle_puts,
-                 'github' : handle_git,
-                 'git'    : handle_git,
-                 'get'    : handle_get,
-                 'rsync'  : handle_rsync }
+                 'pip'        : handle_pip,
+                 '!puts'      : handle_puts,
+                 'github'     : handle_git,
+                 'git'        : handle_git,
+                 'get'        : handle_get,
+                 'setup'      : handle_setup,
+                 'rsync'      : handle_rsync }
+
+    if config:
+        handlers = { '!config' : handle_config }
 
     key = directive[0].lower()
     args = directive[1]
-    return handlers[key](key, args)
+    cmd=[]
+    if key in handlers.keys():
+        cmd = handlers[key](key, args)
+    return cmd
 
-def read_manifest(filestream):
+def read_manifest(filestream, config=False):
     script = []
     lex = shlex.shlex(filestream, posix=True)
     lex.whitespace_split = True
@@ -122,11 +157,11 @@ def read_manifest(filestream):
         directive = token.split(':', 1)
         if len(directive) == 1:
             directive.append(None)
-        script.extend(translate(directive))
+        script.extend(translate(directive, config))
     return script
 
 def execute(script):
-    print(script)
+    print(Colors.WARNING + script + Colors.END)
     p = subprocess.Popen(script,
                          executable='/bin/bash',
                          shell=True,
@@ -140,7 +175,7 @@ def execute(script):
     if rc:
         raise subprocess.CalledProcessError(rc, script)
 
-def open_manifests(filenames):
+def open_manifests(filenames, config=False):
     manifest_dir = os.path.dirname(os.path.realpath(__file__))
     manifest_dir = os.path.join(manifest_dir, 'manifest')
     for filename in filenames:
@@ -149,19 +184,27 @@ def open_manifests(filenames):
             sys.stderr.write("Error: {0} does not exist\n".format(filename))
         else:
             with open(manifest_path) as f:
-                script = '\n'.join(read_manifest(f))
+                script_commands = read_manifest(f, config)
+                script_commands.insert(0, '[[ -f "${HOME}/.workspace.conf" ]] && source "${HOME}/.workspace.conf"')
+                script = '\n'.join(script_commands)
                 for output in execute(script):
                     print(output, end="")
 
 def prompt():
     parser = argparse.ArgumentParser(description="J.A.R.V.I.S")
-    parser.add_argument('--update',
-                        nargs='*', metavar='manifest', help='Update manifests')
+    parser.add_argument('--mirror', action='store_true', help='Save offline mirror')
+    parser.add_argument('command', nargs='*', help='Supported command')
     args = parser.parse_args()
-    if args.update is not None and len(args.update) > 0:
-        open_manifests(args.update)
-    else:
+
+    if not args.command:
         parser.print_help()
+    else:
+        command = args.command.pop(0)
+        if command == 'update':
+            if 'base' not in args.command:
+                args.command.insert(0, 'base')
+            open_manifests(args.command, True)
+            open_manifests(args.command, False)
 
 if __name__ == "__main__":
     prompt()
