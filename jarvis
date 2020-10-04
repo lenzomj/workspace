@@ -11,6 +11,9 @@ import subprocess
 import urlparse
 import hashlib
 
+import SimpleHTTPServer
+import SocketServer
+
 class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -23,6 +26,12 @@ class Colors:
 
 def get_configuration_path():
     path = os.path.expandvars("${HOME}/.workspace.conf")
+    if not os.path.exists(path):
+        return None
+    return path
+
+def get_mirror_path():
+    path = os.path.expandvars("${WORKSPACE_MIRROR}")
     if not os.path.exists(path):
         return None
     return path
@@ -52,9 +61,17 @@ def handle_within(key, args):
 def handle_with(key, args):
     cmd=[]
     if key == 'with':
-        cmd.append("cat >> '{0}' <<'_EOS'".format(args))
+        cmd.append("cat > \"{0}\" <<'_EOS'".format(args))
     elif key == 'end_with':
         cmd.append("_EOS")
+    return cmd
+
+def handle_unless(key, args):
+    cmd=[]
+    if key == 'unless':
+        cmd.append("if [[ ! -x \"$(command -v {0})\" ]]; then".format(args))
+    elif key == 'end_unless':
+        cmd.append("fi")
     return cmd
 
 def handle_puts(key, args):
@@ -130,6 +147,8 @@ def translate(directive, config=False):
                  'with'       : handle_with,
                  'end_with'   : handle_with,
                  'pip'        : handle_pip,
+                 'unless'     : handle_unless,
+                 'end_unless' : handle_unless,
                  '!puts'      : handle_puts,
                  'github'     : handle_git,
                  'git'        : handle_git,
@@ -205,6 +224,14 @@ def prompt():
                 args.command.insert(0, 'base')
             open_manifests(args.command, True)
             open_manifests(args.command, False)
+        elif command == 'serve':
+            port = 8000
+            handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+            httpd = SocketServer.TCPServer(("localhost", port), handler)
+            print("Server started at localhost:" + str(port))
+            mirror = get_mirror_path()
+            os.chdir(mirror)
+            httpd.serve_forever()
 
 if __name__ == "__main__":
     prompt()
