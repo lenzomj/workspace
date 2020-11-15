@@ -36,6 +36,12 @@ def get_mirror_path():
         return None
     return path
 
+def get_bootstrap_path():
+    path = os.path.expandvars("${WORKSPACE_BOOTSTRAP}")
+    if not os.path.exists(path):
+        return None
+    return path
+
 def open_configuration():
     config = { }
     path = get_configuration_path()
@@ -70,7 +76,46 @@ def handle_unless(key, args):
     cmd=[]
     if key == 'unless':
         cmd.append("if [[ ! -x \"$(command -v {0})\" ]]; then".format(args))
+        cmd.append(":")
     elif key == 'end_unless':
+        cmd.append("fi")
+    return cmd
+
+def handle_verify(key, args):
+    cmd="""
+    if [[ ! -x "$(command -v {command})" ]]; then
+        echo "Error: Please install {command}
+        exit 1
+    fi
+    """
+    return [cmd.format(command=args)]
+
+def handle_yum_stage(key, args):
+    cmd="""
+    mkdir -p "${{WORKSPACE_BOOTSTRAP}}/stage"
+    yumdownloader --archlist=x86_64 -x \*i686 --destdir "${{WORKSPACE_BOOTSTRAP}}/stage" --resolve {package}
+    """
+    return [cmd.format(package=args)]
+
+def handle_yum_bootstrap(key, args):
+    cmd="""
+    mkdir -p "${{WORKSPACE_BOOTSTRAP}}/stage"
+    for f in ${{WORKSPACE_BOOTSTRAP}}/stage/*.rpm; do
+        (cd ${{WORKSPACE_BOOTSTRAP}} && rpm2cpio "$f" | cpio -id)
+    done
+    """
+    return [cmd.format()]
+
+def handle_if_system(key, args):
+    cmd=[]
+    if key == 'if_system':
+        cmd.append("my_os=`awk -F= '/^NAME/{print $2}' /etc/os-release`")
+        cmd.append("if [[ \"$my_os\" =~ \"{0}\" ]]; then".format(args))
+        cmd.append("echo $my_os")
+    elif key == 'else_system':
+        cmd.append("else")
+        cmd.append(":")
+    elif key == 'end_if_system':
         cmd.append("fi")
     return cmd
 
@@ -142,8 +187,14 @@ def handle_rsync(key, args):
 
 def translate(directive, config=False):
     handlers = { 'within'     : handle_within,
-                 '!config'    : handle_config,
+                 'verify'     : handle_verify,
                  'end_within' : handle_within,
+                 'if_system'  : handle_if_system,
+                 'else_system': handle_if_system,
+                 'end_if_system' : handle_if_system,
+                 'yum_stage'  : handle_yum_stage,
+                 'yum_bootstrap'  : handle_yum_bootstrap,
+                 '!config'    : handle_config,
                  'with'       : handle_with,
                  'end_with'   : handle_with,
                  'pip'        : handle_pip,

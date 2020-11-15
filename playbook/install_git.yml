@@ -4,12 +4,13 @@
   connection: local
   become: false
   vars:
-    git_version: "2.26.0"
+    git_version: "2.29.2"
+    git_source: "{{ lookup('env', 'WORKSPACE_MIRROR') }}/system"
     workspace: "{{ lookup('env', 'WORKSPACE_BOOTSTRAP') }}/git"
     git_install_path: "{{ lookup('env', 'HOME') }}/.local"
     git_install_from_source: false
-  tasks:
 
+  tasks:
     - name: Prepare workspace
       file:
         path: "{{ workspace }}"
@@ -31,15 +32,9 @@
       when:
         - (git_installed_version.rc == 0) and (git_installed_version.stdout | regex_replace("^.*?([0-9\.]+)$", "\\1") is version(git_version, operator="!="))
 
-    - name: Download source package
-      get_url:
-        url: "https://www.kernel.org/pub/software/scm/git/git-{{ git_version }}.tar.gz"
-        dest: "{{ workspace }}/git-{{ git_version }}.tar.gz"
-      when: (git_installed_version.rc != 0) or (git_install_from_source | bool)
-
     - name: Expand source package
       unarchive:
-        src: "{{ workspace }}/git-{{ git_version }}.tar.gz"
+        src: "{{ git_source }}/git-{{ git_version }}.tar.gz"
         dest: "{{ workspace }}"
         creates: "{{ workspace }}/git-{{ git_version }}/README"
         copy: false

@@ -6,24 +6,56 @@
 !config:'export WORKSPACE="${HOME}/workspace"'
 !config:'export WORKSPACE_MIRROR="${WORKSPACE}/mirror"'
 !config:'export WORKSPACE_BOOTSTRAP="${WORKSPACE}/bootstrap"'
+!config:'export WORKSPACE_PLAYBOOK="${WORKSPACE}/playbook"'
+!config:'export PATH="${WORKSPACE_BOOTSTRAP}/usr/bin:${PATH}"'
+!config:'L=/lib:/lib64:/usr/lib:/usr/lib64'
+!config:'export LD_LIBRARY_PATH="$L:${WORKSPACE_BOOTSTRAP}/usr/lib:${WORKSPACE_BOOTSTRAP}/usr/lib64"'
 
-within:${WORKSPACE_MIRROR}/github
-   github:lenzomj/workspace.git
-end_within
+if_system:"CentOS"
+   unless:git
+      yum_stage:git
+   end_unless
+   unless:curl
+      yum_stage:curl
+   end_unless
+   unless:rsync
+      yum_stage:rsync
+   end_unless
+   unless:python3
+      yum_stage:python3
+   end_unless
+   yum_bootstrap
+   unless:ansible
+      setup:'python3 -m pip install ansible --user'
+   end_unless
+else_system:
+   # Assume local administrator
+   # apt-get install python3, python3-pip, python3-wheel, python3-setuptools
+   verify:git
+   verify:curl
+   verify:rsync
+   verify:python3
+   verify:ansible
+end_if_system
 
-within:${WORKSPACE_MIRROR}/pypi
-   get:'https://bootstrap.pypa.io/get-pip.py'
-end_within
+#within:${WORKSPACE_MIRROR}/system
+#   get:'https://www.kernel.org/pub/software/scm/git/git-2.29.2.tar.gz'
+#end_within
 
-unless:pip
-   setup:'python "${WORKSPACE_MIRROR}/pypi/get-pip.py" --user'
-end_unless
+#within:${WORKSPACE_MIRROR}/pypi
+#   get:'https://bootstrap.pypa.io/get-pip.py'
+#end_within
 
-within:${WORKSPACE_MIRROR}/pypi
-   pip:ansible
-end_within
-
-#pip:'-r bootstrap.txt'
-#unless:ansible
-#   setup:'pip install ansible --user --no-index --find-links "${PYPI_MIRROR}"'
+#unless:pip
+#   setup:'python "${WORKSPACE_MIRROR}/pypi/get-pip.py" --user'
 #end_unless
+
+#within:${WORKSPACE_MIRROR}/pypi
+#   pip:ansible
+#end_within
+
+#unless:ansible
+#   setup:'pip install ansible --user --no-index --find-links ${WORKSPACE_MIRROR}'
+#end_unless
+
+#setup:'ansible-playbook "${WORKSPACE_PLAYBOOK}/install_git.yml"'

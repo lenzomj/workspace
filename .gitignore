@@ -1,6 +1,5 @@
 dotfiles/*
-fonts/*
+bootstrap
 homebrew
 mirror/*
-repolists/*
 .DS_Store
