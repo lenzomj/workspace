@@ -1,0 +1,33 @@
+---
+- name: Install dotfiles from mirror
+  hosts: localhost
+  connection: local
+  become: false
+  vars:
+    home:               "{{ lookup('env', 'HOME') }}"
+    workspace_dotfiles: "{{ lookup('env', 'WORKSPACE_DOTFILES') }}"
+    workspace_mirror:   "{{ lookup('env', 'WORKSPACE_MIRROR') }}"
+    install_manifest:
+      - {path: "{{ home }}/.bash_profile"}
+      - {path: "{{ home }}/.bashrc"}
+      - {path: "{{ home }}/.gitconfig"}
+      - {path: "{{ home }}/.inputrc"}
+      - {path: "{{ home }}/.tmux.conf"}
+      - {path: "{{ home }}/.vimrc"}
+
+  tasks:
+    - name: Clone/update dotfiles from local mirror
+      git:
+        repo: "file://{{ workspace_mirror }}/github/lenzomj/dotfiles.git"
+        dest: "{{ workspace_dotfiles }}"
+
+    - name: Install/update dotfiles scripts
+      shell: "./install.sh {{ home }}"
+      args:
+        chdir: "{{ workspace_dotfiles }}"
+
+    - name: Verify installation
+      stat:
+          path: "{{ item.path }}"
+      with_items: "{{ install_manifest }}"
+

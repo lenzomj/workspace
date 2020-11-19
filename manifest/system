@@ -3,11 +3,23 @@
 #
 
 within:${WORKSPACE_MIRROR}/system
+   # CentOS/RHEL 7
+   setup:"mkdir -p centos/7/os"
+   setup:"mkdir -p centos/7/updates"
+   setup:"mkdir -p centos/7/extras"
+   setup:"mkdir -p fedora-epel"
    rsync:rsync://mirror.cs.pitt.edu/centos/RPM-GPG-KEY-CentOS-7
    rsync:rsync://mirror.cs.pitt.edu/centos/7/os/
    rsync:rsync://mirror.cs.pitt.edu/centos/7/updates/
    rsync:rsync://mirror.cs.pitt.edu/centos/7/extras/
-
    rsync:rsync://mirror.cs.pitt.edu/fedora-epel/RPM-GPG-KEY-EPEL-7
    rsync:"--exclude=debug --exclude=drpms rsync://mirror.cs.pitt.edu/fedora-epel/7/x86_64/"
+
+   # CentOS/RHEL 8
+   setup:"mkdir -p centos/8/BaseOS/x86_64/os"
+   setup:"mkdir -p centos/8/AppStream/x86_64/os"
+   setup:"mkdir -p centos/8/PowerTools/x86_64/os"
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/BaseOS/x86_64/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/AppStream/x86_64/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/PowerTools/x86_64/os/
 end_within

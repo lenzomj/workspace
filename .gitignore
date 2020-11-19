@@ -2,4 +2,5 @@ dotfiles/*
 bootstrap
 homebrew
 mirror/*
+.vagrant
 .DS_Store
