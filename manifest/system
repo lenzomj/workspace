@@ -23,3 +23,7 @@ within:${WORKSPACE_MIRROR}/system
    rsync:rsync://mirror.cs.pitt.edu/centos/8/AppStream/x86_64/os/
    rsync:rsync://mirror.cs.pitt.edu/centos/8/PowerTools/x86_64/os/
 end_within
+
+within:${WORKSPACE_MIRROR}/pypi
+   pip:"ansible"
+end_within

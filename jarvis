@@ -49,6 +49,18 @@ def open_configuration():
                 line = f.readline()
     return config
 
+def handle_if_sudo(key, args):
+    cmd=[]
+    if key == 'if_sudo':
+        cmd.append("if [[ \"$EUID\" -eq 0 ]]; then")
+        cmd.append(":")
+    elif key == 'else_sudo':
+        cmd.append("else")
+        cmd.append(":")
+    elif key == 'end_if_sudo':
+        cmd.append("fi")
+    return cmd
+
 def handle_warn(key, args):
     cmd = """
     printf "{0}{1}{2}\n"
@@ -64,11 +76,12 @@ def handle_within(key, args):
         cmd.append("popd &> /dev/null;")
     return cmd
 
-def handle_with(key, args):
+def handle_write_file(key, args):
     cmd=[]
-    if key == 'with':
+    if key == 'write_file':
+        cmd.append("echo Writing {0}".format(args))
         cmd.append("cat > \"{0}\" <<'_EOS'".format(args))
-    elif key == 'end_with':
+    elif key == 'end_write_file':
         cmd.append("_EOS")
     return cmd
 
@@ -92,10 +105,12 @@ def handle_yum_stage(key, args):
 
 def handle_yum_bootstrap(key, args):
     cmd="""
-    mkdir -p "${{WORKSPACE_BOOTSTRAP}}/stage"
-    for f in ${{WORKSPACE_BOOTSTRAP}}/stage/*.rpm; do
-        (cd ${{WORKSPACE_BOOTSTRAP}} && rpm2cpio "$f" | cpio -id)
-    done
+    if [[ -d "${{WORKSPACE_BOOTSTRAP}}/stage" ]]; then
+        for f in ${{WORKSPACE_BOOTSTRAP}}/stage/*.rpm; do
+            (cd ${{WORKSPACE_BOOTSTRAP}} && rpm2cpio "$f" | cpio -id)
+        done
+        rm -rf "${{WORKSPACE_BOOTSTRAP}}/stage"
+    fi
     """
     return [cmd.format()]
 
@@ -128,7 +143,7 @@ def handle_config(key, args):
 
 def handle_pip(key, args):
     cmd = """
-    pip download {package}
+    python3 -m pip download {package}
     """
     package = args
     return [cmd.format(package=package)]
@@ -185,11 +200,14 @@ def translate(directive, config=False):
                  'if_system'  : handle_if_system,
                  'else_system': handle_if_system,
                  'end_if_system' : handle_if_system,
+                 'if_sudo'  : handle_if_sudo,
+                 'else_sudo': handle_if_sudo,
+                 'end_if_sudo' : handle_if_sudo,
                  'yum_stage'  : handle_yum_stage,
                  'yum_bootstrap'  : handle_yum_bootstrap,
                  '!config'    : handle_config,
-                 'with'       : handle_with,
-                 'end_with'   : handle_with,
+                 'write_file'       : handle_write_file,
+                 'end_write_file'   : handle_write_file,
                  'pip'        : handle_pip,
                  'unless'     : handle_unless,
                  'end_unless' : handle_unless,
@@ -269,10 +287,11 @@ def prompt():
             open_manifests(args.command, True)
             open_manifests(args.command, False)
         elif command == 'bootstrap':
+            args.command = ['base', 'bootstrap']
             open_manifests(args.command, True)
-            open_manifests(['base', 'bootstrap'], False)
+            open_manifests(args.command, False)
         elif command == 'serve':
-            port = 8000
+            port = 8080
             handler = SimpleHTTPServer.SimpleHTTPRequestHandler
             httpd = SocketServer.TCPServer(("localhost", port), handler)
             print("Server started at localhost:" + str(port))
