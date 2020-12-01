@@ -24,6 +24,20 @@ within:${WORKSPACE_MIRROR}/system
    rsync:rsync://mirror.cs.pitt.edu/centos/8/PowerTools/x86_64/os/
 end_within
 
+within:${WORKSPACE_MIRROR}/vagrant/providers/virtualbox
+   get:"https://download.virtualbox.org/virtualbox/6.0.24/VirtualBox-6.0-6.0.24_139119_el8-1.x86_64.rpm"
+   get:"https://download.virtualbox.org/virtualbox/6.0.24/VirtualBox-6.0-6.0.24_139119_el7-1.x86_64.rpm"
+end_within
+
+within:${WORKSPACE_MIRROR}/vagrant/centos
+   within:7
+      get:"https://app.vagrantup.com/centos/boxes/7/versions/2004.01/providers/virtualbox.box"
+   end_within
+   within:8
+      get:"https://app.vagrantup.com/centos/boxes/8/versions/1905.1/providers/virtualbox.box"
+   end_within
+end_within
+
 within:${WORKSPACE_MIRROR}/pypi
    pip:"ansible"
 end_within

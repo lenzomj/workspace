@@ -1,0 +1,37 @@
+---
+- name: Prepare Airgap
+  hosts: localhost
+  become: false
+  vars:
+    workspace_path:   "{{ lookup('env', 'WORKSPACE') }}"
+    workspace_mirror: "{{ lookup('env', 'WORKSPACE_MIRROR') }}"
+
+  tasks:
+    - name: Locate portable drive by mount (Fortress)
+      find:
+        paths: "/media/{{ lookup('env', 'USER') }}"
+        patterns: Fortress
+        file_type: directory
+        recurse: no
+      register: mount
+
+    - name: Set airgap path
+      when: (mount.matched == 1)
+      stat:
+        path: "{{ mount.files[0].path }}/"
+      register: airgap
+
+    - name: Synchronize workspace (working files) to airgap
+      when: (airgap.stat.exists)
+      command: |
+        rsync -avSHP \
+              --delete \
+              --exclude=.git --exclude=.vagrant \
+              --exclude=bootstrap --exclude=dotfiles --exclude=mirror \
+              {{ workspace_path }} \
+              {{ airgap.stat.path }}/working/
+
+    - name: Synchronize workspace mirror to airgap
+      when: (airgap.stat.exists)
+      command: "rsync -avSHP --delete {{ workspace_mirror }} {{ airgap.stat.path }}"
+

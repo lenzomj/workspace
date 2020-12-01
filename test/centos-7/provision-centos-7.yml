@@ -14,7 +14,7 @@
         line: 10.0.2.2 mirrorhost
 
     - name: Disable any default CentOS-7 repositories
-      command: yum-config-manager --disable * --enable mirror\*
+      command: yum-config-manager --disable *
       become_user: root
 
     - name: Add CentOS-7 mirror repositories to /etc/yum.repos.d/
@@ -90,3 +90,13 @@
           RjsC7FDbL017qxS+ZVA/HGkyfiu4cpgV8VUnbql5eAZ+1Ll6Dw==
           =hdPa
           -----END PGP PUBLIC KEY BLOCK-----
+
+    - name: Update installed packages to latest
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Cleanup
+      command: yum clean all
+        warn: false
+      become_user: root

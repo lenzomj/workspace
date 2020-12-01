@@ -295,8 +295,8 @@ def prompt():
             handler = SimpleHTTPServer.SimpleHTTPRequestHandler
             httpd = SocketServer.TCPServer(("localhost", port), handler)
             print("Server started at localhost:" + str(port))
-            mirror = get_mirror_path()
-            os.chdir(mirror)
+            #mirror = get_mirror_path()
+            #os.chdir(mirror)
             httpd.serve_forever()
 
 if __name__ == "__main__":
