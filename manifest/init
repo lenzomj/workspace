@@ -10,30 +10,21 @@
 if_system:"CentOS"
    if_sudo:
       warn:"Running as Sudo"
-      write_file:"/etc/yum.repos.d/CentOS-Mirror.repo"
-         !puts "# BEGIN WORKSPACE MANAGED BLOCK"
-         !puts:"[mirror-base]"
-         !puts:"name=CentOS-$releasever - Base Mirror"
-         !puts:"baseurl=http://mirrorhost:8080/system/centos/$releasever/os/$basearch/"
+      write_file:"/etc/yum.repos.d/CentOS-Bootstrap.repo"
+         !puts:"[mirror-bootstrap]"
+         !puts:"name=CentOS-$releasever - Bootstrap Mirror"
+         !puts:"baseurl=http://localhost:8080/system/centos/$releasever/os/$basearch/"
          !puts:"gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7"
          !puts:"gpgcheck=1"
          !puts:"enabled=1"
-         !puts:"# END WORKSPACE MANAGED BLOCK"
          !puts:""
       end_write_file
 
-      unless:git
-         setup:'yum install -y --disablerepo=* --enablerepo=base-mirror git'
-      end_unless
-      unless:curl
-         setup:'yum install -y --disablerepo=* --enablerepo=base-mirror curl'
-      end_unless
-      unless:rsync
-         setup:'yum install -y --disablerepo=* --enablerepo=base-mirror rsync'
-      end_unless
-      unless:python3
-         setup:'yum install -y --disablerepo=* --enablerepo=base-mirror python3'
-      end_unless
+      setup:'yum install -y --disablerepo=* --enablerepo=mirror-bootstrap git'
+      setup:'yum install -y --disablerepo=* --enablerepo=mirror-bootstrap curl'
+      setup:'yum install -y --disablerepo=* --enablerepo=mirror-bootstrap rsync'
+      setup:'yum install -y --disablerepo=* --enablerepo=mirror-bootstrap python3'
+
       unless:ansible
          warn:"Run bootstrap as user to install ansible"
       end_unless
@@ -55,7 +46,7 @@ if_system:"CentOS"
       yum_bootstrap
 
       unless:ansible
-         setup:"python3 -m pip install --user --trusted-host mirrorhost --no-index --find-links='http://mirrorhost:8080/pypi/' ansible"
+         setup:"python3 -m pip install --user --trusted-host localhost --no-index --find-links='http://localhost:8080/pypi/' ansible"
       end_unless
    end_if_sudo
 end_if_system
