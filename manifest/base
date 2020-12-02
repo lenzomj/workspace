@@ -7,6 +7,7 @@
 !config:'export WORKSPACE_MIRROR="${WORKSPACE}/mirror"'
 !config:'export WORKSPACE_BOOTSTRAP="${WORKSPACE}/bootstrap"'
 !config:'export WORKSPACE_PLAYBOOK="${WORKSPACE}/playbook"'
+!config:'export WORKSPACE_DOTFILES="${WORKSPACE}/dotfiles"'
 
 if_system:"CentOS"
    unless:git

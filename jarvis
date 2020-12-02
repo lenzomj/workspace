@@ -159,6 +159,10 @@ def handle_git(key, args):
         git remote update
       popd &> /dev/null;
     fi
+    pushd "{local}" &> /dev/null;
+        echo "Updating {local} server info ..." >&2
+        git update-server-info
+    popd &> /dev/null;
     """
     local = ""
     remote = ""
@@ -173,8 +177,12 @@ def handle_git(key, args):
 
 def handle_get(key, args):
     cmd = """
-    echo "Downloading {remote} ..." >&2
-    curl -# -L "{remote}" -o "{local}"
+    if [[ ! -f  "{local}" ]]; then
+      echo "Downloading {remote} ..." >&2
+      curl -# -L "{remote}" -o "{local}"
+    else
+      echo "Skipping {local} ..." >&2
+    fi
     """
     url = urlparse.urlsplit(args)
     remote = url.geturl()
@@ -287,7 +295,7 @@ def prompt():
             open_manifests(args.command, True)
             open_manifests(args.command, False)
         elif command == 'bootstrap':
-            args.command = ['base', 'bootstrap']
+            args.command = ['base', 'init']
             open_manifests(args.command, True)
             open_manifests(args.command, False)
         elif command == 'serve':

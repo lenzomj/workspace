@@ -1,3 +1,62 @@
 #
 # Mirror
 #
+
+within:${WORKSPACE_MIRROR}/github
+   github:lenzomj/dotfiles.git
+   github:lenzomj/workspace.git
+   github:ctrlpvim/ctrlp.vim.git
+   github:itchyny/lightline.vim.git
+   github:preservim/nerdtree.git
+   github:godlygeek/tabular.git
+   github:pseewald/vim-anyfold.git
+   github:flazz/vim-colorschemes.git
+   github:airblade/vim-gitgutter.git
+   github:plasticboy/vim-markdown.git
+   github:reedes/vim-pencil.git
+end_within
+
+within:${WORKSPACE_MIRROR}/vagrant
+   get:"https://releases.hashicorp.com/vagrant/2.2.14/vagrant_2.2.14_x86_64.rpm"
+   within:centos/7
+      get:"https://app.vagrantup.com/centos/boxes/7/versions/2004.01/providers/virtualbox.box"
+   end_within
+   within:centos/8
+      get:"https://app.vagrantup.com/centos/boxes/8/versions/1905.1/providers/virtualbox.box"
+   end_within
+   within:providers/virtualbox
+      get:"https://download.virtualbox.org/virtualbox/6.0.24/VirtualBox-6.0-6.0.24_139119_el8-1.x86_64.rpm"
+      get:"https://download.virtualbox.org/virtualbox/6.0.24/VirtualBox-6.0-6.0.24_139119_el7-1.x86_64.rpm"
+   end_within
+end_within
+
+within:${WORKSPACE_MIRROR}/pypi
+   pip:"ansible"
+   pip:"sphinx"
+end_within
+
+within:${WORKSPACE_MIRROR}/system
+   # CentOS/RHEL 7
+   setup:"mkdir -p centos/7/os"
+   setup:"mkdir -p centos/7/updates"
+   setup:"mkdir -p centos/7/extras"
+   setup:"mkdir -p centos/7/sclo/x86_64/rh"
+   rsync:rsync://mirror.cs.pitt.edu/centos/RPM-GPG-KEY-CentOS-7
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/updates/
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/extras/
+   rsync:rsync://mirror.cs.pitt.edu/centos/7/sclo/x86_64/rh/
+
+   # EPEL 7
+   setup:"mkdir -p fedora-epel"
+   rsync:rsync://mirror.cs.pitt.edu/fedora-epel/RPM-GPG-KEY-EPEL-7
+   rsync:"--exclude=debug --exclude=drpms rsync://mirror.cs.pitt.edu/fedora-epel/7/x86_64/"
+
+   # CentOS/RHEL 8
+   setup:"mkdir -p centos/8/BaseOS/x86_64/os"
+   setup:"mkdir -p centos/8/AppStream/x86_64/os"
+   setup:"mkdir -p centos/8/PowerTools/x86_64/os"
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/BaseOS/x86_64/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/AppStream/x86_64/os/
+   rsync:rsync://mirror.cs.pitt.edu/centos/8/PowerTools/x86_64/os/
+end_within
