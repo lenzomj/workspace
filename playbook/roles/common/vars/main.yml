@@ -1,0 +1,15 @@
+---
+
+box_has_airgap_mount: false
+box_airgap_mount_path: none
+box_airgap_mount_paths:
+  - /media/{{ lookup('env', 'USER') }}/Fortress
+  - /mnt/Fortress
+
+
+box_has_internet: false
+box_has_mirror: false
+box_mirror_path: none
+box_data_source: upstream
+
+

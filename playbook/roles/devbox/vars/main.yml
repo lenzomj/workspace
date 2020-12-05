@@ -1,0 +1,9 @@
+---
+
+devbox_workspace: "{{ ansible_env.HOME }}/workspace"
+
+devbox_git_repos:
+  - dotfiles:
+      upstream: https://github.com/lenzomj/dotfiles.git
+      mirror: file://{{ box_mirror_path }}/github/lenzomj/dotfiles.git
+      setup: 'install.sh {{ ansible_env.HOME }}'

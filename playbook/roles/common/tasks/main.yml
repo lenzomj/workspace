@@ -1,0 +1,37 @@
+---
+# common role
+
+  # TODO: Iterate over a list of vars to check multiple URLs
+  - name: Checking for Internet
+    ignore_errors: true
+    uri:
+      url: https://github.com
+      follow_redirects: none
+      method: GET
+    register: _rget
+    until: (_rget.status == 200)
+    retries: 3
+    delay: 0.5
+
+  - name: Checking for an airgap drive
+    with_items: "{{ ansible_mounts }}"
+    when: item.mount in box_airgap_mount_paths
+    set_fact:
+      box_has_airgap_mount: true
+      box_airgap_mount_path: "{{ item.mount }}"
+
+  - name: Verifying Mirror on airgap drive
+    when: (box_has_airgap_mount)
+    stat:
+      path: "{{ box_airgap_mount_path }}/mirror"
+    register: _rstat
+
+  - name: Consolidating facts
+    set_fact:
+      box_has_internet: "{{ (_rget.status == 200) | bool }}"
+      box_has_mirror:   "{{ _rstat.stat.exists }}"
+      box_mirror_path:  "{{ _rstat.stat.path }}"
+
+  - name: Setting data sources
+    set_fact:
+      box_data_source:  "{{ 'upstream' if box_has_internet else 'mirror' }}"

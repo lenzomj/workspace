@@ -1,0 +1,30 @@
+---
+# devbox role
+
+#- name: Checking for git
+#    when: ('git' not in ansible_facts.packages)
+#    fail:
+#      msg: "Required package: git"
+
+  # TODO: Make this a re-usable task with argument box_data_source
+  - name: Cloning repositories from upstream source
+    when: (box_has_internet)
+    git:
+      repo: "{{ lookup('dict', item).value.upstream }}"
+      dest: "{{ devbox_workspace }}/{{ lookup('dict', item).key }}"
+      remote: "{{ box_data_source }}"
+      clone: yes
+      update: no
+    loop: "{{ devbox_git_repos }}"
+
+  # TODO: Make this a re-usable task with argument box_data_source
+  - name: Cloning repositories from mirror source
+    when: (not box_has_internet and box_has_mirror)
+    git:
+      repo: "{{ lookup('dict', item).value.mirror }}"
+      dest: "{{ devbox_workspace }}/{{ lookup('dict', item).key }}"
+      remote: "{{ box_data_source }}"
+      clone: yes
+      update: no
+    loop: "{{ devbox_git_repos }}"
+
