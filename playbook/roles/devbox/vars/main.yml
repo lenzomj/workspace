@@ -4,6 +4,57 @@ devbox_workspace: "{{ ansible_env.HOME }}/workspace"
 
 devbox_git_repos:
   - dotfiles:
-      upstream: https://github.com/lenzomj/dotfiles.git
-      mirror: file://{{ box_mirror_path }}/github/lenzomj/dotfiles.git
-      setup: 'install.sh {{ ansible_env.HOME }}'
+      upstream: ssh://git@github.com/lenzomj/dotfiles.git
+      mirror:   github.com/lenzomj/dotfiles.git
+      clone: true
+      setup: "./install.sh {{ ansible_env.HOME }}"
+
+  - workspace:
+      upstream: ssh://git@github.com/lenzomj/workspace.git
+      mirror:   github.com/lenzomj/workspace.git
+      clone: false
+
+  - ctrlp.vim:
+      upstream: ssh://git@github.com/ctrlpvim/ctrlp.vim.git
+      mirror:   github.com/ctrlpvim/ctrlp.vim.git
+      clone: false
+
+  - lightline.vim:
+      upstream: ssh://git@github.com/itchyny/lightline.vim.git
+      mirror: github.com/itchyny/lightline.vim.git
+      clone: false
+
+  - nerdtree:
+      upstream: ssh://git@github.com/preservim/nerdtree.git
+      mirror: github.com/preservim/nerdtree.git
+      clone: false
+
+  - tabular:
+      upstream: ssh://git@github.com/godlygeek/tabular.git
+      mirror: github.com/godlygeek/tabular.git
+      clone: false
+
+  - vim-anyfold:
+      upstream: ssh://git@github.com/pseewald/vim-anyfold.git
+      mirror: github.com/pseewald/vim-anyfold.git
+      clone: false
+
+  - vim-colorschemes:
+      upstream: ssh://git@github.com/flazz/vim-colorschemes.git
+      mirror: github.com/flazz/vim-colorschemes.git
+      clone: false
+
+  - vim-gitgutter:
+      upstream: ssh://git@github.com/airblade/vim-gitgutter.git
+      mirror: github.com/airblade/vim-gitgutter.git
+      clone: false
+
+  - vim-markdown:
+      upstream: ssh://git@github.com/plasticboy/vim-markdown.git
+      mirror: github.com/plasticboy/vim-markdown.git
+      clone: false
+
+  - vim-pencil:
+      upstream: ssh://git@github.com/reedes/vim-pencil.git
+      mirror: github.com/reedes/vim-pencil.git
+      clone: false

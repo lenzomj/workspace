@@ -6,10 +6,11 @@ box_airgap_mount_paths:
   - /media/{{ lookup('env', 'USER') }}/Fortress
   - /mnt/Fortress
 
-
 box_has_internet: false
 box_has_mirror: false
 box_mirror_path: none
+
+box_has_local_mirror: false
+box_local_mirror_path: none
+
 box_data_source: upstream
-
-
