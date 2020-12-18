@@ -21,25 +21,18 @@
       box_airgap_mount_path: "{{ item.mount }}"
 
   - name: Checking for an airgap mirror
-    when: (box_has_airgap_mount)
     stat:
       path: "{{ box_airgap_mount_path }}/mirror"
     register: _mstat
 
-  # TODO: Make local mirror location configurable
-  - name: Checking for a local mirror
-    stat:
-      path: "{{ ansible_env.HOME }}/mirror"
-    register: _lmstat
+  - name: Creating mirror cache, if it does not exist
+    file:
+      path: "{{ box_cache_path }}"
+      state: directory
 
   - name: Consolidating facts
     set_fact:
       box_has_internet: "{{ (_rget.status == 200) | bool }}"
       box_has_mirror:   "{{ _mstat.stat.exists }}"
-      box_has_local_mirror:  "{{ _lmstat.stat.exists }}"
       box_mirror_path:  "{{ _mstat.stat.path if _mstat.stat.exists else 'none' }}"
-      box_local_mirror_path: "{{ _lmstat.stat.path if _lmstat.stat.exists else 'none' }}"
-
-  - name: Setting data sources
-    set_fact:
-      box_data_source:  "{{ 'upstream' if box_has_internet else 'mirror' }}"
+      box_distro: "{{ ansible_distribution }} {{ ansible_distribution_version | int }}"

@@ -10,7 +10,7 @@ box_has_internet: false
 box_has_mirror: false
 box_mirror_path: none
 
-box_has_local_mirror: false
-box_local_mirror_path: none
+box_cache_path: "{{ ansible_env.HOME }}/.workspace-cache"
+box_workspace_path: "{{ ansible_env.HOME }}/workspace"
 
-box_data_source: upstream
+box_distro: unknown

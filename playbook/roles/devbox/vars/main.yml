@@ -1,7 +1,5 @@
 ---
 
-devbox_workspace: "{{ ansible_env.HOME }}/workspace"
-
 devbox_git_repos:
   - dotfiles:
       upstream: ssh://git@github.com/lenzomj/dotfiles.git

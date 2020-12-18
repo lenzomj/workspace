@@ -1,0 +1,17 @@
+- hosts: localhost
+  tasks:
+    - name: Figure out vagrant versioning
+      command: vagrant box list
+      register: _vboxes
+
+    - name: Find box of interest
+      when: not _box_exists
+      debug:
+        msg: "{{ item }}"
+      vars:
+        _box_exists: "{{ _vboxes.stdout | regex_search(item) }}"
+      with_items:
+        - "centos/7"
+        - "centos/8"
+        - "ubuntu/bionic64"
+        - "ubuntu/whatever"

@@ -1,5 +1,5 @@
 ---
-# devbox role
+# devbox role (main)
 
   # TODO: Make this a re-usable task with argument box_data_source
   - name: Cloning repositories from upstream source
@@ -8,7 +8,7 @@
       - lookup('dict', item).value.clone
     git:
       repo: "{{ lookup('dict', item).value.upstream }}"
-      dest: "{{ devbox_workspace }}/{{ lookup('dict', item).key }}"
+      dest: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
       remote: "{{ box_data_source }}"
       clone: yes
       update: no
@@ -21,7 +21,7 @@
       - lookup('dict', item).value.clone
     git:
       repo: "file://{{ box_mirror_path }}/{{ lookup('dict', item).value.mirror }}"
-      dest: "{{ devbox_workspace }}/{{ lookup('dict', item).key }}"
+      dest: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
       remote: "{{ box_data_source }}"
       clone: yes
       update: no
@@ -34,5 +34,5 @@
       - lookup('dict', item).value.setup is not defined
     command: "{{ lookup('dict', item).value.setup }}"
     args:
-      chdir: "{{ devbox_workspace }}/{{ lookup('dict', item).key }}"
+      chdir: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
     loop: "{{ devbox_git_repos }}"

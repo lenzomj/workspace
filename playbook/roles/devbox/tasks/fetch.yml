@@ -2,10 +2,10 @@
 # devbox role (fetch)
 
   - name: Fetching devbox repositories from upstream source
-    when: (box_has_internet and box_has_local_mirror)
+    when: (box_has_internet)
     git:
       repo: "{{ lookup('dict', item).value.upstream }}"
-      dest: "{{ box_local_mirror_path }}/{{ lookup('dict', item).value.mirror }}"
+      dest: "{{ box_cache_path }}/{{ lookup('dict', item).value.mirror }}"
       bare: yes
       clone: yes
       update: yes
