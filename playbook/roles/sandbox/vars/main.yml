@@ -2,7 +2,7 @@ sandbox_repositories: [ ]
 
 sandbox_managed_packages: [ ]
 
-sandbox_other_packages:
+sandbox_local_packages:
   - vagrant:
       upstream: "https://releases.hashicorp.com/vagrant/2.2.14/vagrant_2.2.14_x86_64.rpm"
       checksum: sha256:be06ce2fa17ad45cdb2fa3c92054194a48b49f46c26ecc2aa1ff928cf861090a

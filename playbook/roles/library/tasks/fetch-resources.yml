@@ -1,0 +1,30 @@
+---
+# library :: fetch-resources
+
+  - name: Creating cache directories as required
+    when: (box_has_internet or box_has_mirror)
+    file:
+      path: "{{ _cache_dir }}"
+      state: directory
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _host: "{{ _upstream | urlsplit('hostname') }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_dir: "{{ _cache_path | dirname }}"
+    loop: "{{ a_resource_list }}"
+
+  - name: Fetching resources from an upstream source
+    when: (box_has_internet or box_has_mirror)
+    get_url:
+      url: "{{ _upstream }}"
+      dest: "{{ _cache_path }}"
+      checksum: "{{ lookup('dict', item).value.checksum }}"
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _host: "{{ _upstream | urlsplit('hostname') }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _mirror_path: "{{ box_mirror_path }}/{{ _host }}{{ _path }}"
+      _uri: "{{ box_has_internet | ternary(_upstream, _mirror_path) }}"
+    loop: "{{ a_resource_list }}"
