@@ -4,13 +4,12 @@
   - name: Fetching sandbox packages and resources from an upstream source
     include: fetch.yml
 
-  - name: Installing packages (Debian)
-    when: ansible_facts['os_family'] == "Debian"
-    include: install-deb.yml
-
-  - name: Installing packages (RHEL)
-    when: ansible_facts['os_family'] == "RedHat"
-    include: install-rpm.yml
+  - name: Installing local packages
+    import_role:
+      name: library
+      tasks_from: install-local
+    vars:
+      a_local_package_list: "{{ sandbox_other_packages }}"
 
   - name: Listing vagrant base boxes
     command: "vagrant box list"

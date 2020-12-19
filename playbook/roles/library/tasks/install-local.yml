@@ -1,0 +1,35 @@
+---
+
+  - name: Installing local .deb package list
+    become: true
+    when:
+      - (ansible_facts['os_family'] == "Debian")
+      - (box_distro in _required)
+    apt:
+      deb: "{{ _cache_path }}"
+      state: present
+    vars:
+      _required: "{{ lookup('dict', item).value.required | default([ ],true) }}"
+      _pkg_name: "{{ lookup('dict', item).key }}"
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _cache_path: "{{ box_cache_path }}/{{ _upstream | urlsplit('path') }}"
+    loop_control:
+      label: "{{ _pkg_name }}"
+    loop: "{{ a_local_package_list }}"
+
+  - name: Installing local .rpm package list
+    become: true
+    when:
+      - (ansible_facts['os_family'] == "RedHat")
+      - (box_distro in _required)
+    package:
+      name: "{{ _cache_path }}"
+      state: present
+    vars:
+      _required: "{{ lookup('dict', item).value.required | default([ ],true) }}"
+      _pkg_name: "{{ lookup('dict', item).key }}"
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _cache_path: "{{ box_cache_path }}/{{ _upstream | urlsplit('path') }}"
+    loop_control:
+      label: "{{ _pkg_name }}"
+    loop: "{{ a_local_package_list }}"
