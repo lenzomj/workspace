@@ -14,7 +14,9 @@
       _cache_dir: "{{ _cache_path | dirname }}"
     loop: "{{ a_resource_list }}"
 
-  - name: Fetching resources from an upstream source
+  - name: >
+      Fetching resources from
+      {{ box_has_internet | ternary('upstream', box_mirror_path) }}
     when: (box_has_internet or box_has_mirror)
     get_url:
       url: "{{ _upstream }}"

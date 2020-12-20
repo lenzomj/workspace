@@ -1,0 +1,26 @@
+---
+# library :: clone-repositories
+
+  - name: "Cloning repositories from {{ box_cache_path }}"
+    when: (lookup('dict', item).value.clone is defined)
+    git:
+      repo: "{{ _cache_path }}"
+      dest: "{{ _clone_path }}"
+      clone: yes
+      update: no
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _host: "{{ _upstream | urlsplit('hostname') }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _clone_path: "{{ lookup('dict', item).value.clone }}"
+    loop: "{{ a_repository_list }}"
+
+  - name: Initializing repositories
+    when:
+      - lookup('dict', item).value.clone is defined
+      - lookup('dict', item).value.setup is defined
+    command: "{{ lookup('dict', item).value.setup }}"
+    args:
+      chdir: "{{ lookup('dict', item).value.clone }}"
+    loop: "{{ a_repository_list }}"

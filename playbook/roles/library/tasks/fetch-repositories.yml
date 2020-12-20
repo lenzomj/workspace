@@ -1,7 +1,9 @@
 ---
 # library :: fetch-repositories
 
-  - name: Fetching repositories from upstream source
+  - name: >
+      Fetching repositories from
+      {{ box_has_internet | ternary('upstream', box_mirror_path) }}
     when: (box_has_internet or box_has_mirror)
     git:
       repo: "{{ _uri }}"
@@ -11,7 +13,9 @@
       update: yes
     vars:
       _upstream: "{{ lookup('dict', item).value.upstream }}"
-      _cache_path: "{{ box_cache_path }}/{{ _upstream | urlsplit('path') }}"
-      _mirror_path: "{{ box_mirror_path }}/{{ _upstream | urlsplit('path') }}"
+      _host: "{{ _upstream | urlsplit('hostname') }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _mirror_path: "{{ box_mirror_path }}/{{ _host }}{{ _path }}"
       _uri: "{{ box_has_internet | ternary(_upstream, _mirror_path) }}"
     loop: "{{ a_repository_list }}"

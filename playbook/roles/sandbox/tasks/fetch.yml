@@ -2,14 +2,11 @@
 # sandbox :: fetch
 
   - name: Fetching sandbox repositories from an upstream source
-    when: (box_has_internet or box_has_mirror)
-    git:
-      repo: "{{ lookup('dict', item).value.upstream }}"
-      dest: "{{ box_cache_path }}/{{ lookup('dict', item).value.mirror }}"
-      bare: yes
-      clone: yes
-      update: yes
-    loop: "{{ sandbox_repositories}}"
+    import_role:
+      name: library
+      tasks_from: fetch-repositories
+    vars:
+      a_repository_list: "{{ sandbox_repositories }}"
 
   - name: Fetching sandbox resources from an upstream source
     import_role:

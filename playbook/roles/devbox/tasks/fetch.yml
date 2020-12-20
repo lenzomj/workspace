@@ -1,12 +1,9 @@
 ---
-# devbox role (fetch)
+# devbox :: fetch
 
-  - name: Fetching devbox repositories from upstream source
-    when: (box_has_internet)
-    git:
-      repo: "{{ lookup('dict', item).value.upstream }}"
-      dest: "{{ box_cache_path }}/{{ lookup('dict', item).value.mirror }}"
-      bare: yes
-      clone: yes
-      update: yes
-    loop: "{{ devbox_git_repos }}"
+  - name: Fetching devbox repositories from an upstream source
+    import_role:
+      name: library
+      tasks_from: fetch-repositories
+    vars:
+      a_repository_list: "{{ devbox_repositories }}"

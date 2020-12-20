@@ -1,10 +1,12 @@
 ---
+# fetchbox :: main
 
-  # TODO: Fetch all roles regardless of whether this host has them
   - name: Fetch resources required for each role
     include_role:
       name: "{{ role }}"
       tasks_from: fetch
-    loop: "{{ ansible_play_role_names }}"
+    with_items:
+      - devbox
+      - sandbox
     loop_control:
       loop_var: role

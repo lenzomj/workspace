@@ -1,38 +1,11 @@
 ---
-# devbox role (main)
+# devbox :: main
 
-  # TODO: Make this a re-usable task with argument box_data_source
-  - name: Cloning repositories from upstream source
-    when:
-      - box_has_internet
-      - lookup('dict', item).value.clone
-    git:
-      repo: "{{ lookup('dict', item).value.upstream }}"
-      dest: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
-      remote: "{{ box_data_source }}"
-      clone: yes
-      update: no
-    loop: "{{ devbox_git_repos }}"
+  - include: fetch.yml
 
-  # TODO: Make this a re-usable task with argument box_data_source
-  - name: Cloning repositories from mirror source
-    when:
-      - not box_has_internet and box_has_mirror
-      - lookup('dict', item).value.clone
-    git:
-      repo: "file://{{ box_mirror_path }}/{{ lookup('dict', item).value.mirror }}"
-      dest: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
-      remote: "{{ box_data_source }}"
-      clone: yes
-      update: no
-    loop: "{{ devbox_git_repos }}"
-
-  # TODO: Make this a re-usable task
-  - name: Running post-checkout setup
-    when:
-      - lookup('dict', item).value.clone
-      - lookup('dict', item).value.setup is not defined
-    command: "{{ lookup('dict', item).value.setup }}"
-    args:
-      chdir: "{{ box_workspace_path }}/{{ lookup('dict', item).key }}"
-    loop: "{{ devbox_git_repos }}"
+  - name: Cloning repositories from an upstream source
+    import_role:
+      name: library
+      tasks_from: clone-repositories
+    vars:
+      a_repository_list: "{{ devbox_repositories }}"
