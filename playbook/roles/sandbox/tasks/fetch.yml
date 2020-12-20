@@ -1,15 +1,13 @@
 ---
 # sandbox :: fetch
 
-  - name: Fetching sandbox repositories from an upstream source
-    import_role:
+  - import_role:
       name: library
       tasks_from: fetch-repositories
     vars:
       a_repository_list: "{{ sandbox_repositories }}"
 
-  - name: Fetching sandbox resources from an upstream source
-    import_role:
+  - import_role:
       name: library
       tasks_from: fetch-resources
     vars:

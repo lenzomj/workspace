@@ -4,6 +4,6 @@
   # TODO: Establish role dependencies
   roles:
     - role: common
-    - role: devbox
-      #- role: fetchbox
-      #- role: sandbox
+      #- role: devbox
+    - role: fetchbox
+   #- role: sandbox

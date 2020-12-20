@@ -1,0 +1,21 @@
+---
+# fetchbox :: vars
+
+fetchbox_mirrors:
+  - mirror.centos.org:
+      upstream: "rsync://mirror.cs.pitt.edu/centos/RPM-GPG-KEY-CentOS-7"
+
+  - mirror.centos.org:
+      upstream: "rsync://mirror.cs.pitt.edu/centos/7/os/"
+
+  - mirror.centos.org:
+      upstream: "rsync://mirror.cs.pitt.edu/centos/7/updates/"
+
+  - mirror.centos.org:
+      upstream: "rsync://mirror.cs.pitt.edu/centos/7/extras/"
+
+  - mirror.centos.org:
+      upstream: "rsync://mirror.cs.pitt.edu/centos/7/sclo/x86_64/rh/"
+
+  - mirror.ctan.org:
+      upstream: "rsync://mirrors.rit.edu/CTAN/systems/texlive/tlnet/"

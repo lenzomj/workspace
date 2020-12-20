@@ -1,0 +1,25 @@
+---
+# library :: sync-mirror
+
+  - name: Creating cache directories as required
+    when: (box_has_internet)
+    file:
+      path: "{{ _cache_dir }}"
+      state: directory
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _host: "{{ lookup('dict', item).key }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_dir: "{{ _cache_path | dirname }}"
+    loop: "{{ a_mirror_list }}"
+
+  - name: Syncing mirrors from upstream
+    when: (box_has_internet)
+    command: "rsync -avSHP --no-motd --delete {{ _upstream }} {{ _local }}"
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      _host: "{{ lookup('dict', item).key }}"
+      _path: "{{ _upstream | urlsplit('path') }}"
+      _local: "{{ box_cache_path }}/{{ _host }}{{ _path | dirname }}"
+    loop: "{{ a_mirror_list }}"
