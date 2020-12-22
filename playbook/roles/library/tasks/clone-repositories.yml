@@ -6,6 +6,7 @@
     git:
       repo: "{{ _cache_path }}"
       dest: "{{ _clone_path }}"
+      remote: origin
       clone: yes
       update: no
     vars:
@@ -14,6 +15,16 @@
       _path: "{{ _upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
       _clone_path: "{{ lookup('dict', item).value.clone }}"
+    loop: "{{ a_repository_list }}"
+
+  - name: Adding upstream remote
+    when: (lookup('dict', item).value.clone is defined)
+    command: "git remote add upstream {{ _upstream }}"
+    args:
+      chdir: "{{ lookup('dict', item).value.clone }}"
+    vars:
+      _upstream: "{{ lookup('dict', item).value.upstream }}"
+    ignore_errors: true
     loop: "{{ a_repository_list }}"
 
   - name: Initializing repositories
