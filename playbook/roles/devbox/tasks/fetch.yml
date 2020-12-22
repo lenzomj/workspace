@@ -1,20 +1,10 @@
 ---
 # devbox :: fetch
 
-  - name: Finding python package requirements file
-    stat:
-      path: "{{ role_path }}/files/pypi_packages.txt"
-    register: _reqs
-    failed_when: (not _reqs.stat.exists)
-
-  - import_role:
-      name: library
-      tasks_from: fetch-repositories
+  - import_tasks: "{{ box_task_library }}/fetch-repositories.yml"
     vars:
       a_repository_list: "{{ devbox_repositories }}"
 
-  - import_role:
-      name: library
-      tasks_from: fetch-pypackages
+  - import_tasks: "{{ box_task_library }}/fetch-pypackages.yml"
     vars:
-      a_requirements_file: "{{ _reqs }}"
+      a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"

@@ -1,5 +1,5 @@
 ---
-# common role
+# common :: tasks
 
   # TODO: Iterate over a list of vars to check multiple URLs
   - name: Checking for Internet

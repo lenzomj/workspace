@@ -1,5 +1,5 @@
 ---
-# fetchbox :: main
+# fetchbox :: tasks
 
   - name: Fetching resources required for other roles
     include_role:
@@ -7,12 +7,10 @@
       tasks_from: fetch
     with_items:
       - devbox
-        #- sandbox
+      - sandbox
     loop_control:
       loop_var: role
 
-  - import_role:
-      name: library
-      tasks_from: sync-mirror
+  - import_tasks: "{{ box_task_library }}/sync-mirror.yml"
     vars:
       a_mirror_list: "{{ fetchbox_mirrors }}"

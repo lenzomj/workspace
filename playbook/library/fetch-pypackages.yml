@@ -1,10 +1,16 @@
 ---
-# devbox :: fetch-pypackages
+# library :: fetch-pypackages
 
   - name: Creating cache directories as required
     file:
       path: "{{ box_cache_path }}/pypi.org"
       state: directory
+
+  - name: Finding specified python package requirements file
+    stat:
+      path: "{{ a_requirements_file }}"
+    register: _reqs
+    failed_when: (not _reqs.stat.exists)
 
   - name: >
       Fetching python packages from
@@ -16,7 +22,6 @@
     vars:
       _python: "{{ ansible_python_interpreter }}"
       _from_mirror: "--no-index --find-links={{ box_mirror_path }}/pypi.org"
-      _reqs: "{{ a_requirements_file }}"
       _opts: "{{ box_has_internet | ternary('', _from_mirror) }}"
     register: _result
     changed_when: (_result.stdout | regex_search('Saved'))

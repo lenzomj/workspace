@@ -3,10 +3,7 @@
 
   - include: fetch.yml
 
-  - name: Installing local packages
-    import_role:
-      name: library
-      tasks_from: install-local
+  - import_tasks: "{{ box_task_library }}/install-local.yml"
     vars:
       a_local_package_list: "{{ sandbox_local_packages }}"
 

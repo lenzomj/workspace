@@ -1,4 +1,5 @@
 ---
+# devbox :: vars
 
 devbox_repositories:
   - dotfiles:

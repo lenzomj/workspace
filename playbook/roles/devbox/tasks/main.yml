@@ -1,11 +1,13 @@
 ---
-# devbox :: main
+# devbox :: tasks
 
   - include: fetch.yml
 
-  - name: Cloning repositories from an upstream source
-    import_role:
-      name: library
-      tasks_from: clone-repositories
+  - import_tasks: "{{ box_task_library }}/install-pypackages.yml"
+    vars:
+      a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"
+      a_virtualenv_path: "{{ box_workspace_path }}/devbox"
+
+  - import_tasks: "{{ box_task_library }}/clone-repositories.yml"
     vars:
       a_repository_list: "{{ devbox_repositories }}"

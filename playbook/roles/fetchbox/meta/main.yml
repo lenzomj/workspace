@@ -1,0 +1,5 @@
+---
+# fetchbox :: meta
+
+dependencies:
+  - role: common
