@@ -1,46 +1,47 @@
-sandbox_repositories: [ ]
-
-sandbox_managed_packages: [ ]
-
-sandbox_local_packages:
-  - vagrant:
+sandbox:
+  resources:
+    - resource: vagrant-rhel
       upstream: "https://releases.hashicorp.com/vagrant/2.2.14/vagrant_2.2.14_x86_64.rpm"
       checksum: sha256:be06ce2fa17ad45cdb2fa3c92054194a48b49f46c26ecc2aa1ff928cf861090a
-      required:
-        - "CentOS 7"
-        - "CentOS 8"
+      handlers: install on RedHat
+      requires: (ansible_distribution_major_version | int >= 7)
 
-  - vagrant:
+    - resource: vagrant-deb
       upstream: "https://releases.hashicorp.com/vagrant/2.2.14/vagrant_2.2.14_x86_64.deb"
       checksum: sha256:b5a522d29aee754df41901b227e2ca276bbfe435df6d91a11a54362a04a561da
-      required:
-        - "Linux Mint 19"
+      handlers: download and install on Debian
 
-  - virtualbox:
+    - resource: virtualbox-rhel7
       upstream: "https://download.virtualbox.org/virtualbox/6.1.16/VirtualBox-6.1-6.1.16_140961_el7-1.x86_64.rpm"
       checksum: sha256:279c16c9101dbf198843ce491e1606cef821c6c6ca5fa9b18d706e44b42ec8bd
-      required:
-        - "CentOS 7"
+      handlers: download and install on RedHat
+      requires: (ansible_distribution_major_version | int  == 7)
 
-  - virtualbox:
+    - resource: virtualbox-bionic64
       upstream: "https://download.virtualbox.org/virtualbox/6.1.16/virtualbox-6.1_6.1.16-140961~Ubuntu~bionic_amd64.deb"
       checksum: sha256:7ab2de86dbbafb5fbbc5f9f1e4a7e6440873f490da9807aadaac996fb21bfab0
-      required:
-        - "Linux Mint 19"
+      handlers: download and install on Debian
+      requires: ((ansible_distribution == "Ubuntu" and
+                  ansible_distribution_major_version | int == 18) or
+                 (ansible_distribution == "Linux Mint" and
+                  ansible_distribution_major_version | int == 19))
 
-sandbox_resources:
-  - vagrant-box-centos/7:
+    - resource: vagrant-box-centos/7
       upstream: "https://app.vagrantup.com/centos/boxes/7/versions/2004.01/providers/virtualbox.box"
       checksum: sha256:7e83943defcb5c4e9bebbe4184cce4585c82805a15e936b01b1e893b63dee2c5
+      handlers: download
 
-  - vagrant-box-centos/8:
+    - resource: vagrant-box-centos/8
       upstream: "https://app.vagrantup.com/centos/boxes/8/versions/2011.0/providers/virtualbox.box"
       checksum: sha256:fee51a026c1caa9d88a8c74f09352ef4b7606952285cdf2888ea062a8eee499f
+      handlers: download
 
-  - vagrant-box-ubuntu/bionic64:
+    - resource: vagrant-box-ubuntu/bionic64
       upstream: "https://app.vagrantup.com/ubuntu/boxes/bionic64/versions/20201211.1.0/providers/virtualbox.box"
       checksum: sha256:9f1674222616abcf9b91395dbff3daaaf8f161e706d6b3593ce3acf8f34b080f
+      handlers: download
 
-  - vagrant-box-ubuntu/focal64:
+    - resource: vagrant-box-ubuntu/focal64
       upstream: "https://app.vagrantup.com/ubuntu/boxes/focal64/versions/20201210.0.0/providers/virtualbox.box"
       checksum: sha256:649d40248f542b4c57b5e0710a7ac1e229ccd5cf83f90b668aa7a0cf760909f2
+      handlers: download

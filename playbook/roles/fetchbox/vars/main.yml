@@ -1,21 +1,28 @@
 ---
 # fetchbox :: vars
 
-fetchbox_mirrors:
-  - mirror.centos.org:
+fetchbox:
+  resources:
+    - resource: kubic-repo-key
+      upstream: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
+      checksum: sha256:4e15d48e67d6d2b454bcd2749434887b4c736497336153854c9398ec1a06e60a
+      handlers: download
+
+  mirrors:
+    - mirror: mirror.centos.org
       upstream: "rsync://mirror.cs.pitt.edu/centos/RPM-GPG-KEY-CentOS-7"
 
-  - mirror.centos.org:
+    - mirror: mirror.centos.org
       upstream: "rsync://mirror.cs.pitt.edu/centos/7/os/"
 
-  - mirror.centos.org:
+    - mirror: mirror.centos.org
       upstream: "rsync://mirror.cs.pitt.edu/centos/7/updates/"
 
-  - mirror.centos.org:
+    - mirror: mirror.centos.org
       upstream: "rsync://mirror.cs.pitt.edu/centos/7/extras/"
 
-  - mirror.centos.org:
+    - mirror: mirror.centos.org
       upstream: "rsync://mirror.cs.pitt.edu/centos/7/sclo/x86_64/rh/"
 
-  - mirror.ctan.org:
+    - mirror: mirror.ctan.org
       upstream: "rsync://mirrors.rit.edu/CTAN/systems/texlive/tlnet/"

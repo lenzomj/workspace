@@ -1,12 +1,6 @@
 ---
 # sandbox :: fetch
 
-  - import_tasks: "{{ box_task_library }}/fetch-repositories.yml"
-    vars:
-      a_repository_list: "{{ sandbox_repositories }}"
-
   - import_tasks: "{{ box_task_library }}/fetch-resources.yml"
     vars:
-      a_resource_list: "{{ sandbox_managed_packages +
-                           sandbox_local_packages +
-                           sandbox_resources }}"
+      resources: "{{ sandbox.resources }}"

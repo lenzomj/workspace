@@ -4,29 +4,25 @@
   - name: Creating cache directories as required
     when: (box_has_internet or box_has_mirror)
     file:
-      path: "{{ _cache_dir }}"
+      path: "{{ _cache_path | dirname }}"
       state: directory
     vars:
-      _upstream: "{{ lookup('dict', item).value.upstream }}"
-      _host: "{{ _upstream | urlsplit('hostname') }}"
-      _path: "{{ _upstream | urlsplit('path') }}"
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
-      _cache_dir: "{{ _cache_path | dirname }}"
-    loop: "{{ a_resource_list }}"
+    loop: "{{ resources }}"
 
   - name: >
       Fetching resources from
       {{ box_has_internet | ternary('upstream', box_mirror_path) }}
     when: (box_has_internet or box_has_mirror)
     get_url:
-      url: "{{ _upstream }}"
+      url: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
       dest: "{{ _cache_path }}"
-      checksum: "{{ lookup('dict', item).value.checksum }}"
+      checksum: "{{ item.checksum }}"
     vars:
-      _upstream: "{{ lookup('dict', item).value.upstream }}"
-      _host: "{{ _upstream | urlsplit('hostname') }}"
-      _path: "{{ _upstream | urlsplit('path') }}"
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
       _mirror_path: "{{ box_mirror_path }}/{{ _host }}{{ _path }}"
-      _uri: "{{ box_has_internet | ternary(_upstream, _mirror_path) }}"
-    loop: "{{ a_resource_list }}"
+    loop: "{{ resources }}"
