@@ -3,7 +3,7 @@
 
   - import_tasks: "{{ box_task_library }}/fetch-repositories.yml"
     vars:
-      a_repository_list: "{{ devbox_repositories }}"
+      repositories: "{{ devbox.repositories }}"
 
   - import_tasks: "{{ box_task_library }}/fetch-pypackages.yml"
     vars:

@@ -1,38 +1,39 @@
 ---
 # devbox :: vars
 
-devbox_repositories:
-  - dotfiles:
+devbox:
+  repositories:
+    - repository: dotfiles
       upstream: ssh://git@github.com/lenzomj/dotfiles.git
       clone: "{{ box_workspace_path }}/dotfiles"
       setup: "./install.sh {{ ansible_env.HOME }}"
 
-  - workspace:
+    - repository: workspace
       upstream: ssh://git@github.com/lenzomj/workspace.git
 
-  - ctrlp.vim:
+    - repository: ctrlp.vim
       upstream: ssh://git@github.com/ctrlpvim/ctrlp.vim.git
 
-  - lightline.vim:
+    - repository: lightline.vim
       upstream: ssh://git@github.com/itchyny/lightline.vim.git
 
-  - nerdtree:
+    - repository: nerdtree
       upstream: ssh://git@github.com/preservim/nerdtree.git
 
-  - tabular:
+    - repository: tabular
       upstream: ssh://git@github.com/godlygeek/tabular.git
 
-  - vim-anyfold:
+    - repository: vim-anyfold
       upstream: ssh://git@github.com/pseewald/vim-anyfold.git
 
-  - vim-colorschemes:
+    - repository: vim-colorschemes
       upstream: ssh://git@github.com/flazz/vim-colorschemes.git
 
-  - vim-gitgutter:
+    - repository: vim-gitgutter
       upstream: ssh://git@github.com/airblade/vim-gitgutter.git
 
-  - vim-markdown:
+    - repository: vim-markdown
       upstream: ssh://git@github.com/plasticboy/vim-markdown.git
 
-  - vim-pencil:
+    - repository: vim-pencil
       upstream: ssh://git@github.com/reedes/vim-pencil.git

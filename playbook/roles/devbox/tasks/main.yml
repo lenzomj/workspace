@@ -10,4 +10,4 @@
 
   - import_tasks: "{{ box_task_library }}/clone-repositories.yml"
     vars:
-      a_repository_list: "{{ devbox_repositories }}"
+      repositories: "{{ devbox.repositories }}"

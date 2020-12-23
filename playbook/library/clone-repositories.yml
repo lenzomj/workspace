@@ -2,36 +2,31 @@
 # library :: clone-repositories
 
   - name: "Cloning repositories from {{ box_cache_path }}"
-    when: (lookup('dict', item).value.clone is defined)
     git:
       repo: "{{ _cache_path }}"
-      dest: "{{ _clone_path }}"
+      dest: "{{ item.clone }}"
       remote: origin
       clone: yes
       update: no
     vars:
-      _upstream: "{{ lookup('dict', item).value.upstream }}"
-      _host: "{{ _upstream | urlsplit('hostname') }}"
-      _path: "{{ _upstream | urlsplit('path') }}"
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
-      _clone_path: "{{ lookup('dict', item).value.clone }}"
-    loop: "{{ a_repository_list }}"
+    loop: "{{ repositories | selectattr('clone', 'defined') }}"
 
+    # TODO: Check if remote already exists
   - name: Adding upstream remote
-    when: (lookup('dict', item).value.clone is defined)
-    command: "git remote add upstream {{ _upstream }}"
+    command: "git remote add upstream {{ item.upstream }}"
     args:
-      chdir: "{{ lookup('dict', item).value.clone }}"
-    vars:
-      _upstream: "{{ lookup('dict', item).value.upstream }}"
+      chdir: "{{ item.clone }}"
     ignore_errors: true
-    loop: "{{ a_repository_list }}"
+    loop: "{{ repositories | selectattr('clone', 'defined') }}"
 
   - name: Initializing repositories
-    when:
-      - lookup('dict', item).value.clone is defined
-      - lookup('dict', item).value.setup is defined
-    command: "{{ lookup('dict', item).value.setup }}"
+    command: "{{ item.setup }}"
     args:
-      chdir: "{{ lookup('dict', item).value.clone }}"
-    loop: "{{ a_repository_list }}"
+      chdir: "{{ item.clone }}"
+    loop: "{{ repositories
+              | selectattr('clone', 'defined')
+              | selectattr('setup', 'defined')
+           }}"
