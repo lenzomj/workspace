@@ -4,7 +4,9 @@
   - name: >
       Fetching repositories from
       {{ box_has_internet | ternary('upstream', box_mirror_path) }}
-    when: (box_has_internet or box_has_mirror)
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     git:
       repo: "{{ _uri }}"
       dest: "{{ _cache_path }}"

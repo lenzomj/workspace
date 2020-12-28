@@ -3,6 +3,11 @@
   hosts: localhost
   roles:
     - fetchbox
+  vars_prompt:
+    - name: box_allow_fetch
+      prompt: Allow fetch tasks?
+      default: true
+      private: no
   tasks:
     - name: Pushing {{ box_cache_path }} to {{ box_mirror_path }}
       when: (box_has_mirror)

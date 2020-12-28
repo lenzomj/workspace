@@ -1,8 +1,10 @@
 ---
-# library :: sync-mirror
+# library :: fetch-mirror
 
   - name: Creating cache directories as required
-    when: (box_has_internet)
+    when:
+      - box_allow_fetch
+      - box_has_internet
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
@@ -12,8 +14,10 @@
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ mirrors }}"
 
-  - name: Syncing mirrors from upstream
-    when: (box_has_internet)
+  - name: Fetching mirrors from upstream
+    when:
+      - box_allow_fetch
+      - box_has_internet
     command: "rsync -avSHP --no-motd --delete {{ _opts }} {{ item.upstream }} {{ _local }}"
     vars:
       _host: "{{ item.mirror }}"

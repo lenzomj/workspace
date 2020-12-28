@@ -2,7 +2,9 @@
 # library :: fetch-resources
 
   - name: Creating cache directories as required
-    when: (box_has_internet or box_has_mirror)
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
@@ -15,7 +17,9 @@
   - name: >
       Fetching resources from
       {{ box_has_internet | ternary('upstream', box_mirror_path) }}
-    when: (box_has_internet or box_has_mirror)
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     get_url:
       url: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
       dest: "{{ _cache_path }}"

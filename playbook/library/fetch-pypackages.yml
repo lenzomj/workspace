@@ -2,11 +2,17 @@
 # library :: fetch-pypackages
 
   - name: Creating cache directories as required
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     file:
       path: "{{ box_cache_path }}/pypi.org"
       state: directory
 
   - name: Finding specified python package requirements file
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     stat:
       path: "{{ a_requirements_file }}"
     register: _reqs
@@ -15,7 +21,9 @@
   - name: >
       Fetching python packages from
       {{ box_has_internet | ternary('pypi.org', box_mirror_path) }}
-    when: (box_has_internet or box_has_mirror)
+    when:
+      - box_allow_fetch
+      - box_has_internet or box_has_mirror
     command: "{{ _python }} -m pip download {{ _opts }} -r {{ _reqs.stat.path }}"
     args:
       chdir: "{{ box_cache_path }}/pypi.org"

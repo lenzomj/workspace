@@ -12,9 +12,7 @@
     with_items:
       - devbox
       - sandbox
+      - kubebox
+      - lonelybox
     loop_control:
       loop_var: role
-
-  - import_tasks: "{{ box_task_library }}/sync-mirror.yml"
-    vars:
-      mirrors: "{{ fetchbox.mirrors }}"
