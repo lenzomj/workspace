@@ -1,0 +1,22 @@
+---
+# kubebox-debian :: tasks
+
+  - name: Add kubic repository on Debian
+    become: true
+    lineinfile:
+      path: /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+      line: "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/ /"
+      create: yes
+
+  - name: Add kubic repository key on Debian
+    become: true
+    apt_key:
+      file: "{{ _keyfile_path }}"
+      state: present
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _keyfile_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ kubebox.resources
+              | selectattr('resource', 'search', 'repo-key')
+           }}"

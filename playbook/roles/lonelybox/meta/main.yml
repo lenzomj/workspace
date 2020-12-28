@@ -1,0 +1,5 @@
+---
+# lonelybox :: meta
+
+dependencies:
+  - role: common

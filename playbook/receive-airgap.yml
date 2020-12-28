@@ -1,0 +1,10 @@
+---
+- name: Receive Airgap
+  hosts: localhost
+  roles:
+    - common
+  tasks:
+    - name: Pulling {{ box_mirror_path }} to {{ box_cache_path }}
+      when: (box_has_mirror)
+      command: "rsync -avSHP --delete {{ box_mirror_path }}/ {{ box_cache_path }}"
+

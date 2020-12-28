@@ -5,34 +5,6 @@
     vars:
       resources: "{{ fetchbox.resources }}"
 
-  - name: Add kubic repository on Debian
-    become: true
-    when: ((ansible_distribution == "Ubuntu" and
-            ansible_distribution_major_version | int == 18) or
-           (ansible_distribution == "Linux Mint" and
-            ansible_distribution_major_version | int == 19))
-    lineinfile:
-      path: /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-      line: "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/ /"
-      create: yes
-
-  - name: Add kubic repository key on Debian
-    become: true
-    when: ((ansible_distribution == "Ubuntu" and
-            ansible_distribution_major_version | int == 18) or
-           (ansible_distribution == "Linux Mint" and
-            ansible_distribution_major_version | int == 19))
-    apt_key:
-      file: "{{ _keyfile_path }}"
-      state: present
-    vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _keyfile_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
-    loop: "{{ fetchbox.resources
-              | selectattr('resource', 'search', 'repo-key')
-           }}"
-
   - name: Fetching resources required for other roles
     include_role:
       name: "{{ role }}"

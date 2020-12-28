@@ -4,36 +4,36 @@
 devbox:
   repositories:
     - repository: dotfiles
-      upstream: ssh://git@github.com/lenzomj/dotfiles.git
+      upstream: https://github.com/lenzomj/dotfiles.git
       clone: "{{ box_workspace_path }}/dotfiles"
       setup: "./install.sh {{ ansible_env.HOME }}"
 
     - repository: workspace
-      upstream: ssh://git@github.com/lenzomj/workspace.git
+      upstream: https://github.com/lenzomj/workspace.git
 
     - repository: ctrlp.vim
-      upstream: ssh://git@github.com/ctrlpvim/ctrlp.vim.git
+      upstream: https://github.com/ctrlpvim/ctrlp.vim.git
 
     - repository: lightline.vim
-      upstream: ssh://git@github.com/itchyny/lightline.vim.git
+      upstream: https://github.com/itchyny/lightline.vim.git
 
     - repository: nerdtree
-      upstream: ssh://git@github.com/preservim/nerdtree.git
+      upstream: https://github.com/preservim/nerdtree.git
 
     - repository: tabular
-      upstream: ssh://git@github.com/godlygeek/tabular.git
+      upstream: https://github.com/godlygeek/tabular.git
 
     - repository: vim-anyfold
-      upstream: ssh://git@github.com/pseewald/vim-anyfold.git
+      upstream: https://github.com/pseewald/vim-anyfold.git
 
     - repository: vim-colorschemes
-      upstream: ssh://git@github.com/flazz/vim-colorschemes.git
+      upstream: https://github.com/flazz/vim-colorschemes.git
 
     - repository: vim-gitgutter
-      upstream: ssh://git@github.com/airblade/vim-gitgutter.git
+      upstream: https://github.com/airblade/vim-gitgutter.git
 
     - repository: vim-markdown
-      upstream: ssh://git@github.com/plasticboy/vim-markdown.git
+      upstream: https://github.com/plasticboy/vim-markdown.git
 
     - repository: vim-pencil
-      upstream: ssh://git@github.com/reedes/vim-pencil.git
+      upstream: https://github.com/reedes/vim-pencil.git

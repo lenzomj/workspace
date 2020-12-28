@@ -1,0 +1,8 @@
+---
+
+- name: Provision Workstation
+  hosts: localhost
+  roles:
+    - devbox
+    - sandbox
+    - kubebox

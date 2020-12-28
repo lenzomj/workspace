@@ -1,0 +1,6 @@
+---
+# kubebox :: fetch
+
+  - import_tasks: "{{ box_task_library }}/fetch-resources.yml"
+    vars:
+      resources: "{{ kubebox.resources }}"

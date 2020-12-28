@@ -3,6 +3,6 @@
   become: no
   # TODO: Establish role dependencies
   roles:
-    # - role: devbox
-   #- role: fetchbox
-   - role: sandbox
+    - role: devbox
+      #- role: fetchbox
+    #- role: sandbox
