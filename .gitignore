@@ -1,5 +1,3 @@
 dotfiles/*
-bootstrap
-mirror/*
-.vagrant
+devbox/*
 .DS_Store
