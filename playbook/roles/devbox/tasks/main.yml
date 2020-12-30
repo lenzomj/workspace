@@ -11,3 +11,11 @@
   - import_tasks: "{{ box_task_library }}/clone-repositories.yml"
     vars:
       repositories: "{{ devbox.repositories }}"
+
+  - name: >
+      Configuring vim to always update plugins from {{ box_workspace_cache }}
+    lineinfile:
+      path: "{{ ansible_env.HOME }}/.bashrc_local"
+      state: present
+      create: yes
+      line: 'export VIM_PLUG_CACHE="{{ box_cache_path }}"'

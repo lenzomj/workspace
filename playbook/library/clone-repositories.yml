@@ -7,19 +7,23 @@
       dest: "{{ item.clone }}"
       remote: origin
       clone: yes
-      update: no
+      update: yes
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories | selectattr('clone', 'defined') }}"
 
-    # TODO: Check if remote already exists
   - name: Adding upstream remote
-    command: "git remote add upstream {{ item.upstream }}"
+    shell: |
+      if ! (git remote | grep -q upstream); then
+        git remote add upstream {{ item.upstream }}
+        echo "Added upstream remote"
+      fi
     args:
       chdir: "{{ item.clone }}"
-    ignore_errors: true
+    register: _result
+    changed_when: _result.stdout | regex_search("Added upstream remote")
     loop: "{{ repositories | selectattr('clone', 'defined') }}"
 
   - name: Initializing repositories
