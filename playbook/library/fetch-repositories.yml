@@ -3,7 +3,7 @@
 
   - name: >
       Fetching repositories from
-      {{ box_has_internet | ternary('upstream', box_mirror_path) }}
+      {{ box_has_internet | ternary('upstream', box_mirror_uri) }}
     when:
       - box_allow_fetch
       - box_has_internet or box_has_mirror
@@ -17,6 +17,6 @@
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
-      _mirror_path: "{{ box_mirror_path }}/{{ _host }}{{ _path }}"
+      _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
       _uri: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
     loop: "{{ repositories }}"

@@ -15,13 +15,51 @@
 
   - name: Installing new vagrant base boxes
     when: (not _box_exists)
-    shell: "vagrant box add --force {{ _box_name }} {{ _cache_path }}"
+    shell: "vagrant box add --force {{ _base_box }} {{ _cache_path }}"
     vars:
-      _box_name: "{{ item.resource.split('-')[2] | lower }}"
-      _box_exists: "{{ _vagrant_boxes.stdout | regex_search(_box_name) }}"
+      #_box_name: "{{ item.resource.split('-')[2] | lower }}"
+      _base_box: "{{ item.args.base_box }}"
+      _box_exists: "{{ _vagrant_boxes.stdout | regex_search(_base_box) }}"
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ sandbox.resources
-              | selectattr('resource', 'search', 'vagrant-box')
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-add')
+           }}"
+
+  - name: Creating sandbox factory
+    file:
+      path: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template}}"
+      state: directory
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-package')
+           }}"
+
+  - name: Generating factory configurations
+    template:
+      src: "box-config.json"
+      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/box-config.json"
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-package')
+           }}"
+
+  - name: Generating factory provisioners
+    template:
+      src: "{{ item.args.template }}/provision.sh"
+      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/provision.sh"
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-package')
+           }}"
+
+  - name: Generating factory templates
+    template:
+      src: "{{ item.args.template }}/Vagrantfile"
+      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/Vagrantfile"
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-package')
            }}"

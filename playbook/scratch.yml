@@ -1,4 +1,6 @@
 - hosts: localhost
+  roles:
+    - common
   vars:
     box:
       repositories:
@@ -32,46 +34,7 @@
 
   tasks:
   - debug:
-      msg: "{{ box.resources
-                | selectattr('handlers', 'defined')
-                | selectattr('handlers', 'search', 'download')
-            }}"
-
-  - debug:
-      msg: "{{ item.upstream }}"
-    loop: "{{ box.resources
-              | selectattr('handlers', 'defined')
-              | selectattr('handlers', 'search', 'install.*Debian')
-           }}"
-
-  - debug:
-      msg: "{{ box.resources
-                | selectattr('handlers', 'defined')
-                | selectattr('handlers', 'search', 'install.*RHEL')
-            }}"
-
-  - debug:
-      msg:  "{{ item.argument | regex_replace('<.*>', 'new') }}"
-    loop: "{{ box.resources
-                | selectattr('handlers', 'defined')
-                | selectattr('handlers', 'search', 'execute.*Debian')
-                | selectattr('argument', 'defined')
-            }}"
-
-  - debug:
-      msg: "{{ ansible_os_family }}, {{ ansible_distribution }}, {{ ansible_distribution_major_version }}"
-
-  - debug:
-      msg: "{{((ansible_distribution == 'Ubuntu' and
-            ansible_distribution_major_version | int  == 18) or
-           (ansible_distribution == 'Linux Mint' and
-            ansible_distribution_major_version | int == 19))}}"
-
-
-  - debug:
-      msg: "{{ (ansible_distribution == 'Linux Mint' and
-                ansible_distribution_major_version == '19') }}"
-
+      msg: "Done"
 
 
 

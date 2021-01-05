@@ -9,7 +9,6 @@
       default: true
       private: no
   tasks:
-    - name: Pushing {{ box_cache_path }} to {{ box_mirror_path }}
-      when: (box_has_mirror)
-      command: "rsync -avSHP --delete {{ box_cache_path }}/ {{ box_mirror_path }}"
-
+    - name: Pushing {{ box_cache_path }} to {{ box_gapmirror_uri }}
+      when: (box_has_gapmirror)
+      command: "rsync -avSHP --delete {{ box_cache_path }}/ {{ box_gapmirror_uri }}"

@@ -20,7 +20,7 @@
 
   - name: >
       Fetching python packages from
-      {{ box_has_internet | ternary('pypi.org', box_mirror_path) }}
+      {{ box_has_internet | ternary('pypi.org', box_mirror_uri) }}
     when:
       - box_allow_fetch
       - box_has_internet or box_has_mirror
@@ -29,7 +29,7 @@
       chdir: "{{ box_cache_path }}/pypi.org"
     vars:
       _python: "{{ ansible_python_interpreter }}"
-      _from_mirror: "--no-index --find-links={{ box_mirror_path }}/pypi.org"
+      _from_mirror: "--no-index --find-links={{ box_mirror_uri }}/pypi.org"
       _opts: "{{ box_has_internet | ternary('', _from_mirror) }}"
     register: _result
     changed_when: (_result.stdout | regex_search('Saved'))
