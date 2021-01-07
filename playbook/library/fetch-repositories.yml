@@ -8,15 +8,16 @@
       - box_allow_fetch
       - box_has_internet or box_has_mirror
     git:
-      repo: "{{ _uri }}"
-      dest: "{{ _cache_path }}"
+      repo: "{{ _repo }}"
+      dest: "{{ _dest }}"
       bare: yes
       clone: yes
       update: yes
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ item.args.cache | default(box_cache_path) }}"
       _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
-      _uri: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
+      _repo: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories }}"

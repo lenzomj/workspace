@@ -1,4 +1,4 @@
-roles_extended/*
+playbook/roles_extended/*
 dotfiles/*
 devbox/*
 sandbox/*
