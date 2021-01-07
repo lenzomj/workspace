@@ -14,7 +14,8 @@ box_has_gapmirror: false
 box_has_mirror: false
 
 box_gapmirror_uri: none
-box_netmirror_uri: "http://localhost:8080"
+box_netmirror_port: 8080
+box_netmirror_uri: "http://localhost:{{ box_netmirror_port }}"
 box_mirror_uri: none
 
 box_cache_path: "{{ ansible_env.HOME }}/.workspace-cache"

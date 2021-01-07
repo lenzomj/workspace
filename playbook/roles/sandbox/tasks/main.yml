@@ -28,38 +28,11 @@
               | selectattr('handlers', 'search', 'vagrant-add')
            }}"
 
-  - name: Creating sandbox factory
-    file:
-      path: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template}}"
-      state: directory
+  - name: Creating vagrant box factory
+    include_tasks: generate-boxfactory.yml
     loop: "{{ sandbox.resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'vagrant-package')
            }}"
 
-  - name: Generating factory configurations
-    template:
-      src: "box-config.json"
-      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/box-config.json"
-    loop: "{{ sandbox.resources
-              | selectattr('handlers', 'defined')
-              | selectattr('handlers', 'search', 'vagrant-package')
-           }}"
 
-  - name: Generating factory provisioners
-    template:
-      src: "{{ item.args.template }}/provision.sh"
-      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/provision.sh"
-    loop: "{{ sandbox.resources
-              | selectattr('handlers', 'defined')
-              | selectattr('handlers', 'search', 'vagrant-package')
-           }}"
-
-  - name: Generating factory templates
-    template:
-      src: "{{ item.args.template }}/Vagrantfile"
-      dest: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}/Vagrantfile"
-    loop: "{{ sandbox.resources
-              | selectattr('handlers', 'defined')
-              | selectattr('handlers', 'search', 'vagrant-package')
-           }}"
