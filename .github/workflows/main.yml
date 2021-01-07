@@ -14,4 +14,4 @@ jobs:
     - name: Update base
       run: |
         cd ${GITHUB_WORKSPACE}
-        ./workspace update base
+        echo "Done for now"
