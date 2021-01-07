@@ -1,0 +1,10 @@
+---
+# devbox :: fetch
+
+  - import_tasks: "{{ box_task_library }}/fetch-repositories.yml"
+    vars:
+      repositories: "{{ devbox.repositories }}"
+
+  - import_tasks: "{{ box_task_library }}/fetch-pypackages.yml"
+    vars:
+      a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"

@@ -1,0 +1,5 @@
+---
+# kubebox :: meta
+
+dependencies:
+  - role: common

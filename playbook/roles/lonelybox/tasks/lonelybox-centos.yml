@@ -1,0 +1,61 @@
+---
+# lonelybox :: tasks
+
+    - name: Adding CentOS-7 mirror repositories to /etc/yum.repos.d/
+      become: true
+      blockinfile:
+        path: /etc/yum.repos.d/CentOS-Mirror.repo
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          [mirror-base]
+          name=CentOS-$releasever - Base Mirror
+          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          gpgcheck=1
+          enabled=1
+
+          [mirror-updates]
+          name=CentOS-$releasever - Updates Mirror
+          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          gpgcheck=1
+          enabled=1
+
+          [mirror-extras]
+          name=CentOS-$releasever - Extras Mirror
+          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          gpgcheck=1
+          enabled=1
+
+          [mirror-centos-sclo-rh]
+          name=CentOS-7 - SCLo rh Mirror
+          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-SCLo
+          gpgcheck=1
+          enabled=1
+
+          [mirror-epel]
+          name=EPEL-$releasever - $basearch Mirror
+          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+          gpgcheck=1
+          enabled=1
+
+    - name: Adding extra CentOS-7 mirror repository keys
+      become: true
+      package:
+        name:
+          - centos-release-scl
+          - epel-release
+        state: present
+
+    - name: Verifing base packages
+      become: true
+      package:
+        name:
+          - "@Development tools"
+        state: present

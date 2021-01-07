@@ -1,0 +1,34 @@
+{
+  "provisioners": [
+     {
+       "type": "shell",
+       "execute_command": "{%raw%}echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'{%endraw%}",
+       "script": "update.sh",
+       "expect_disconnect": true
+     },
+     {
+       "type": "shell",
+       "execute_command": "{%raw%}echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'{%endraw%}",
+       "script": "provision.sh"
+     },
+     {
+       "type": "shell",
+       "execute_command": "{%raw%}echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'{%endraw%}",
+       "script": "cleanup.sh"
+     }
+  ],
+
+  "builders": [
+    {
+      "box_name": "{{ item.args.base_box }}",
+      "source_path": "{{ item.args.base_box }}",
+      "add_force": true,
+      "output_dir": "{{ box_workspace_path }}/sandbox/boxes/{{ item.args.template}}",
+      "provider": "virtualbox",
+      "template": "Vagrantfile",
+      "type": "vagrant",
+      "communicator": "ssh"
+    }
+  ]
+}
+

@@ -1,0 +1,18 @@
+---
+# fetchbox :: tasks
+
+  - import_tasks: "{{ box_task_library }}/fetch-resources.yml"
+    vars:
+      resources: "{{ fetchbox.resources }}"
+
+  - name: Fetching resources required for other roles
+    include_role:
+      name: "{{ role }}"
+      tasks_from: fetch
+    with_items:
+      - devbox
+      - sandbox
+      - kubebox
+      - lonelybox
+    loop_control:
+      loop_var: role

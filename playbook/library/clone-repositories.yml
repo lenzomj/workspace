@@ -1,0 +1,36 @@
+---
+# library :: clone-repositories
+
+  - name: "Cloning repositories from {{ box_cache_path }}"
+    git:
+      repo: "{{ _cache_path }}"
+      dest: "{{ item.clone }}"
+      remote: origin
+      clone: yes
+      update: yes
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ repositories | selectattr('clone', 'defined') }}"
+
+  - name: Adding upstream remote
+    shell: |
+      if ! (git remote | grep -q upstream); then
+        git remote add upstream {{ item.upstream }}
+        echo "Added upstream remote"
+      fi
+    args:
+      chdir: "{{ item.clone }}"
+    register: _result
+    changed_when: _result.stdout | regex_search("Added upstream remote")
+    loop: "{{ repositories | selectattr('clone', 'defined') }}"
+
+  - name: Initializing repositories
+    command: "{{ item.setup }}"
+    args:
+      chdir: "{{ item.clone }}"
+    loop: "{{ repositories
+              | selectattr('clone', 'defined')
+              | selectattr('setup', 'defined')
+           }}"

@@ -1,6 +1,4 @@
 dotfiles/*
-fonts/*
-homebrew
-mirror/*
-repolists/*
+devbox/*
+sandbox/*
 .DS_Store

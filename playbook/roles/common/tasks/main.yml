@@ -1,0 +1,64 @@
+---
+# common :: tasks
+
+  - name: Consolidating facts about configuation options
+    set_fact:
+      box_allow_fetch: "{{ box_allow_fetch | default(true) | bool }}"
+
+  # TODO: Iterate over a list of vars to check multiple URLs
+  - name: Checking for access to upstream resources
+    ignore_errors: true
+    uri:
+      url: https://github.com
+      follow_redirects: safe
+      method: GET
+    register: _rget_upstream
+    until: (_rget_upstream.status == 200)
+    failed_when: false
+    retries: 2
+    delay: 0.5
+
+  - name: Checking for a local network mirror
+    ignore_errors: true
+    uri:
+      url: "{{ box_netmirror_uri }}/github.com"
+      follow_redirects: safe
+      method: GET
+    register: _rget_localhost
+    until: (_rget_localhost.status == 200)
+    failed_when: false
+    retries: 2
+    delay: 0.5
+
+  - name: Consolidating facts about networked resources
+    set_fact:
+      box_has_internet: "{{ (_rget_upstream.status == 200) | bool }}"
+      box_has_netmirror: "{{ (_rget_localhost.status == 200) | bool }}"
+
+    #TODO: Use a filter to narrow down candiates
+  - name: Checking for an airgap drive
+    with_items: "{{ ansible_mounts }}"
+    when: item.mount in box_airgap_mount_paths
+    set_fact:
+      box_has_airgap_mount: true
+      box_airgap_mount_path: "{{ item.mount }}"
+
+  - name: Checking for an airgap mirror
+    stat:
+      path: "{{ box_airgap_mount_path }}/mirror"
+    register: _mstat
+
+  - name: Consolidating facts about airgap resources
+    set_fact:
+      box_has_gapmirror: "{{ _mstat.stat.exists }}"
+      box_gapmirror_uri: "{{ _mstat.stat.path if _mstat.stat.exists else 'none' }}"
+
+  - name: Creating mirror cache, if it does not exist
+    file:
+      path: "{{ box_cache_path }}"
+      state: directory
+
+  - name: Consolidating facts
+    set_fact:
+      box_has_mirror: (box_has_netmirror or box_has_gapmirror)
+      box_mirror_uri: "{{ box_gapmirror_uri }}"

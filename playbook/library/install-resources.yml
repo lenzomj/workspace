@@ -1,0 +1,52 @@
+---
+# library :: install-resources
+
+  - name: Installing .deb package resources
+    become: true
+    when:
+      - (ansible_os_family == "Debian")
+      - (item.requires | default(true, true))
+    apt:
+      deb: "{{ _cache_path }}"
+      state: present
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'install.*Debian')
+           }}"
+
+  - name: Installing .rpm package resources
+    become: true
+    when:
+      - (ansible_os_family == "RedHat")
+      - (item.requires | default(true, true))
+    package:
+      name: "{{ _cache_path }}"
+      state: present
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'install.*RedHat')
+           }}"
+
+  - name: Extracting archived resources
+    when:
+      - (item.requires | default(true, true))
+    unarchive:
+      src: "{{ _cache_path }}"
+      dest: "{{ item.argument }}"
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _handler: "extract.*{{ ansible_os_family }}"
+    loop: "{{ resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', _handler)
+           }}"

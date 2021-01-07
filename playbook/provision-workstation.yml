@@ -1,0 +1,13 @@
+---
+
+- name: Provision Workstation
+  hosts: localhost
+  roles:
+    - devbox
+    - sandbox
+    - kubebox
+  vars_prompt:
+    - name: box_allow_fetch
+      prompt: Allow fetch tasks?
+      default: true
+      private: no

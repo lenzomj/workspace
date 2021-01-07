@@ -1,0 +1,14 @@
+---
+- name: Prepare Airgap
+  hosts: localhost
+  roles:
+    - fetchbox
+  vars_prompt:
+    - name: box_allow_fetch
+      prompt: Allow fetch tasks?
+      default: true
+      private: no
+  tasks:
+    - name: Pushing {{ box_cache_path }} to {{ box_gapmirror_uri }}
+      when: (box_has_gapmirror)
+      command: "rsync -avSHP --delete {{ box_cache_path }}/ {{ box_gapmirror_uri }}"

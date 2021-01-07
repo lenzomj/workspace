@@ -1,0 +1,311 @@
+#!/usr/bin/env python2
+#vi: set ft=python
+
+from __future__ import print_function
+
+import argparse
+import os.path
+import sys
+import shlex
+import subprocess
+import urlparse
+import hashlib
+
+import SimpleHTTPServer
+import SocketServer
+
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    END    = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def get_configuration_path():
+    path = os.path.expandvars("${HOME}/.workspace.conf")
+    if not os.path.exists(path):
+        return None
+    return path
+
+def get_mirror_path():
+    path = os.path.expandvars("${WORKSPACE_MIRROR}")
+    if not os.path.exists(path):
+        return None
+    return path
+
+def open_configuration():
+    config = { }
+    path = get_configuration_path()
+    if path and os.path.exists(path):
+        with open(path) as f:
+            line = f.readline()
+            while line:
+                line = line.strip()
+                hashed = hashlib.md5(line)
+                config[hashed.hexdigest()] = line
+                line = f.readline()
+    return config
+
+def handle_if_sudo(key, args):
+    cmd=[]
+    if key == 'if_sudo':
+        cmd.append("if [[ \"$EUID\" -eq 0 ]]; then")
+        cmd.append(":")
+    elif key == 'else_sudo':
+        cmd.append("else")
+        cmd.append(":")
+    elif key == 'end_if_sudo':
+        cmd.append("fi")
+    return cmd
+
+def handle_warn(key, args):
+    cmd = """
+    printf "{0}{1}{2}\n"
+    """
+    return [cmd.format(Colors.WARNING, args, Colors.END)]
+
+def handle_within(key, args):
+    cmd =[]
+    if key == 'within':
+        cmd.append("[[ -d \"{0}\" ]] || mkdir -p \"{0}\"".format(args))
+        cmd.append("pushd \"{0}\" >/dev/null;".format(args))
+    elif key == 'end_within':
+        cmd.append("popd &> /dev/null;")
+    return cmd
+
+def handle_write_file(key, args):
+    cmd=[]
+    if key == 'write_file':
+        cmd.append("echo Writing {0}".format(args))
+        cmd.append("cat > \"{0}\" <<'_EOS'".format(args))
+    elif key == 'end_write_file':
+        cmd.append("_EOS")
+    return cmd
+
+def handle_unless(key, args):
+    cmd=[]
+    if key == 'unless':
+        cmd.append("if [[ ! -x \"$(command -v {0})\" ]]; then".format(args))
+        cmd.append(":")
+    elif key == 'end_unless':
+        cmd.append("fi")
+    return cmd
+
+def handle_yum_stage(key, args):
+    cmd="""
+    mkdir -p "${{WORKSPACE_BOOTSTRAP}}/stage"
+    yumdownloader --archlist=x86_64 -x \*i686 \
+                  --destdir "${{WORKSPACE_BOOTSTRAP}}/stage" \
+                  --resolve {package}
+    """
+    return [cmd.format(package=args)]
+
+def handle_yum_bootstrap(key, args):
+    cmd="""
+    if [[ -d "${{WORKSPACE_BOOTSTRAP}}/stage" ]]; then
+        for f in ${{WORKSPACE_BOOTSTRAP}}/stage/*.rpm; do
+            (cd ${{WORKSPACE_BOOTSTRAP}} && rpm2cpio "$f" | cpio -id)
+        done
+        rm -rf "${{WORKSPACE_BOOTSTRAP}}/stage"
+    fi
+    """
+    return [cmd.format()]
+
+def handle_if_system(key, args):
+    cmd=[]
+    if key == 'if_system':
+        cmd.append("my_os=`awk -F= '/^NAME/{print $2}' /etc/os-release`")
+        cmd.append("if [[ \"$my_os\" =~ \"{0}\" ]]; then".format(args))
+        cmd.append("echo $my_os")
+    elif key == 'else_system':
+        cmd.append("else")
+        cmd.append("echo $my_os")
+    elif key == 'end_if_system':
+        cmd.append("fi")
+    return cmd
+
+def handle_puts(key, args):
+    return [args]
+
+def handle_setup(key, args):
+    return [args]
+
+def handle_config(key, args):
+    cmd=[]
+    hashed = hashlib.md5(args)
+    config = open_configuration()
+    if hashed.hexdigest() not in config.keys():
+        cmd.append("echo '{0}' >> ${{HOME}}/.workspace.conf".format(args))
+    return cmd
+
+def handle_pip(key, args):
+    cmd = """
+    python3 -m pip download {package}
+    """
+    package = args
+    return [cmd.format(package=package)]
+
+def handle_git(key, args):
+    cmd = """
+    if [[ ! -d "{local}" ]]; then
+      echo "Mirroring {remote} ..." >&2
+      git clone --mirror --recursive "{remote}" "{local}"
+    else
+      pushd "{local}" &> /dev/null;
+        echo "Updating {local} ..." >&2
+        git remote update
+      popd &> /dev/null;
+    fi
+    pushd "{local}" &> /dev/null;
+        echo "Updating {local} server info ..." >&2
+        git update-server-info
+    popd &> /dev/null;
+    """
+    local = ""
+    remote = ""
+    if key == 'github':
+        remote = "https://github.com/{0}".format(args)
+        local = args
+    else:
+        url = urlparse.urlsplit(args)
+        remote = args
+        local = url.path.lstrip('/')
+    return [cmd.format(local=local, remote=remote)]
+
+def handle_get(key, args):
+    cmd = """
+    if [[ ! -f  "{local}" ]]; then
+      echo "Downloading {remote} ..." >&2
+      curl -# -L "{remote}" -o "{local}"
+    else
+      echo "Skipping {local} ..." >&2
+    fi
+    """
+    url = urlparse.urlsplit(args)
+    remote = url.geturl()
+    local = os.path.basename(url.path)
+    return [cmd.format(local=local, remote=remote)]
+
+def handle_rsync(key, args):
+    cmd = """
+    echo "Syncing {remote} ..." >&2
+    rsync -avSHP --no-motd --delete {flags} {remote} {local} >&2
+    """
+    args = args.split()
+    url = urlparse.urlsplit(args.pop()) # URI is always last
+    remote = url.geturl()
+    local = url.path.lstrip('/')
+    flags = ' '.join(args)
+    return [cmd.format(local=local, remote=remote, flags=flags)]
+
+def translate(directive, config=False):
+    handlers = { 'within'     : handle_within,
+                 'warn'       : handle_warn,
+                 'end_within' : handle_within,
+                 'if_system'  : handle_if_system,
+                 'else_system': handle_if_system,
+                 'end_if_system' : handle_if_system,
+                 'if_sudo'  : handle_if_sudo,
+                 'else_sudo': handle_if_sudo,
+                 'end_if_sudo' : handle_if_sudo,
+                 'yum_stage'  : handle_yum_stage,
+                 'yum_bootstrap'  : handle_yum_bootstrap,
+                 '!config'    : handle_config,
+                 'write_file'       : handle_write_file,
+                 'end_write_file'   : handle_write_file,
+                 'pip'        : handle_pip,
+                 'unless'     : handle_unless,
+                 'end_unless' : handle_unless,
+                 '!puts'      : handle_puts,
+                 'github'     : handle_git,
+                 'git'        : handle_git,
+                 'get'        : handle_get,
+                 'setup'      : handle_setup,
+                 'rsync'      : handle_rsync }
+
+    if config:
+        handlers = { '!config' : handle_config }
+
+    key = directive[0].lower()
+    args = directive[1]
+    cmd=[]
+    if key in handlers.keys():
+        cmd = handlers[key](key, args)
+    return cmd
+
+def read_manifest(filestream, config=False):
+    script = []
+    lex = shlex.shlex(filestream, posix=True)
+    lex.whitespace_split = True
+    for token in lex:
+        if not token.startswith('!'):
+            token = os.path.expandvars(token)
+        directive = token.split(':', 1)
+        if len(directive) == 1:
+            directive.append(None)
+        script.extend(translate(directive, config))
+    return script
+
+def execute(script):
+    #print(Colors.WARNING + script + Colors.END)
+    p = subprocess.Popen(script,
+                         executable='/bin/bash',
+                         shell=True,
+                         stderr=subprocess.PIPE,
+                         stdout=None)
+
+    for stderr_line in iter(p.stderr.readline, ""):
+        yield stderr_line
+    p.stderr.close()
+    rc = p.wait()
+    if rc:
+        raise subprocess.CalledProcessError(rc, script)
+
+def open_manifests(filenames, config=False):
+    manifest_dir = os.path.dirname(os.path.realpath(__file__))
+    manifest_dir = os.path.join(manifest_dir, 'manifest')
+    for filename in filenames:
+        manifest_path = os.path.join(manifest_dir, filename)
+        if not os.path.exists(manifest_path):
+            sys.stderr.write("Error: {0} does not exist\n".format(filename))
+        else:
+            with open(manifest_path) as f:
+                script_commands = read_manifest(f, config)
+                script_commands.insert(0, '[[ -f "${HOME}/.workspace.conf" ]] && source "${HOME}/.workspace.conf"')
+                script = '\n'.join(script_commands)
+                for output in execute(script):
+                    print(output, end="")
+
+def prompt():
+    parser = argparse.ArgumentParser(description="J.A.R.V.I.S")
+    parser.add_argument('--mirror', action='store_true', help='Save offline mirror')
+    parser.add_argument('command', nargs='*', help='Supported command')
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+    else:
+        command = args.command.pop(0)
+        if command == 'update':
+            if 'base' not in args.command:
+                args.command.insert(0, 'base')
+            open_manifests(args.command, True)
+            open_manifests(args.command, False)
+        elif command == 'bootstrap':
+            args.command = ['base', 'init']
+            open_manifests(args.command, True)
+            open_manifests(args.command, False)
+        elif command == 'serve':
+            port = 8080
+            handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+            httpd = SocketServer.TCPServer(("localhost", port), handler)
+            print("Server started at localhost:" + str(port))
+            #mirror = get_mirror_path()
+            #os.chdir(mirror)
+            httpd.serve_forever()
+
+if __name__ == "__main__":
+    prompt()

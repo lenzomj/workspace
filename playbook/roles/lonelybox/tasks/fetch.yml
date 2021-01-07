@@ -1,0 +1,6 @@
+---
+# lonelybox :: fetch
+
+  - import_tasks: "{{ box_task_library }}/fetch-mirror.yml"
+    vars:
+      mirrors: "{{ lonelybox.mirrors }}"

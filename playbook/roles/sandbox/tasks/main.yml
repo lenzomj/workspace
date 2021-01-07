@@ -1,0 +1,38 @@
+---
+# sandbox :: main
+
+  - include: fetch.yml
+
+  - import_tasks: "{{ box_task_library }}/install-resources.yml"
+    vars:
+      resources: "{{ sandbox.resources }}"
+
+  - name: Listing vagrant base boxes
+    command: "vagrant box list"
+    register: _vagrant_boxes
+    changed_when: false
+    failed_when: (_vagrant_boxes.rc != 0)
+
+  - name: Installing new vagrant base boxes
+    when: (not _box_exists)
+    shell: "vagrant box add --force {{ _base_box }} {{ _cache_path }}"
+    vars:
+      #_box_name: "{{ item.resource.split('-')[2] | lower }}"
+      _base_box: "{{ item.args.base_box }}"
+      _box_exists: "{{ _vagrant_boxes.stdout | regex_search(_base_box) }}"
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-add')
+           }}"
+
+  - name: Creating vagrant box factory
+    include_tasks: generate-boxfactory.yml
+    loop: "{{ sandbox.resources
+              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', 'vagrant-package')
+           }}"
+
+

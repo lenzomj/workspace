@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+box_workspace_path="${HOME}/workspace"
+box_bootstrap_path="${HOME}/.workspace-bootstrap"
+
+my_os=`awk -F= '/^NAME/{print $2}' /etc/os-release`
+base_apps=( "curl" "rsync" "git" "python3")
+
+L="/lib:/lib64:/usr/lib:/usr/lib64"
+LD_LIBRARY_PATH="$L:${box_bootstrap_path}/usr/lib:${box_bootstrap_path}/usr/lib64"
+PATH="${box_bootstrap_path}/usr/bin:${PATH}"
+
+if [[ "${my_os}" =~ "CentOS" ]]; then
+
+  for app in "${base_apps[@]}"; do
+    if [[ ! -x "$(command -v ${app})" ]]; then
+      mkdir -p "${box_workspace_path}/stage"
+      yumdownloader --archlist=x86_64 -x \*i686 \
+                    --destdir "${box_workspace_path}/stage" \
+                    --resolve "${app}"
+    else
+      which "${app}"
+    fi
+  done
+
+  if [[ -d "${box_workspace_path}/stage" ]]; then
+    mkdir -p "${box_bootstrap_path}"
+    for f in ${box_workspace_path}/stage/*.rpm; do
+      (cd "${box_bootstrap_path}" && rpm2cpio "$f" | cpio -id)
+    done
+    rm -rf "${box_workspace_path}/stage"
+  fi
+
+  if [[ -d "${box_bootstrap_path}" ]]; then
+    export LD_LIBRARY_PATH
+    export PATH
+
+    if (which git | grep -q "${box_bootstrap_path}") then
+      export GIT_EXEC_PATH="${box_bootstrap_path}/usr/libexec/git-core"
+      git --exec-path
+    fi
+  fi
+
+  if [[ ! -x "$(command -v ansible)" ]]; then
+    python3 -m pip install --user ansible
+  else
+    which ansible
+  fi
+
+  # mkdir -p workspace && curl -L https://github.com/lenzomj/workspace/archive/python-refactor.tar.gz | tar xzf - -C ./workspace --strip-components=1
+  # cd workspace && source activate
+  # git init && git remote add origin git@github.com:lenzomj/workspace.git
+  # git fetch && git checkout -f <branch>
+  #
+fi

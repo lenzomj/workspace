@@ -1,7 +1,0 @@
-#
-# Testing
-#
-
-with:${WORKSPACE_MIRROR}/github
-   github:bats-core/bats-assert.git
-end
