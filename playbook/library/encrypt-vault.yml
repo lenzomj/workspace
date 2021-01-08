@@ -1,0 +1,28 @@
+---
+# library :: encrypt-vault
+
+  - name: "Obtaining {{ vault_name }} vault data"
+    no_log: true
+    pause:
+      prompt: "Value of {{ vault_var }}"
+      echo: false
+    register: _variables
+    loop_control:
+      loop_var: vault_var
+    loop: "{{ vault_vars }}"
+
+  - name: "Encrypting {{ vault_name }} vault data"
+    no_log: true
+    command: >
+      ansible-vault encrypt_string {{ item.user_input }} \
+                    --vault-id {{ vault_name }}@{{ box_vault_keyfile }} \
+                    --name {{ item.vault_var }}
+    register: _ansible_vault_output
+    loop: "{{ _variables.results }}"
+
+  - name: "Stashing encrypted {{ vault_name }} vault data in {{ box_vault_path }}"
+    blockinfile:
+      path: "{{ box_vault_path }}"
+      marker: "# {mark} {{ vault_name }}:{{ item.key }}"
+      block: "{{ item.value.stdout }}"
+    with_dict: "{{ dict(vault_vars | zip(_ansible_vault_output.results)) }}"

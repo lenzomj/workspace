@@ -12,7 +12,6 @@ box_workspace_path: "{{ ansible_env.HOME }}/workspace"
 # Path to local data cache for fetch tasks
 box_cache_path: "{{ ansible_env.HOME }}/.workspace-cache"
 
-
 # Resources ###################################################################
 
 # Upstream status
@@ -37,3 +36,11 @@ box_airgap_mount_paths:
   - /media/{{ lookup('env', 'USER') }}/Fortress
   - /run/media/{{ lookup('env', 'USER') }}/Fortress
   - /mnt/Fortress
+
+# Vault #######################################################################
+
+# Path to workspace vault
+box_vault_path: "{{ ansible_env.HOME }}/.workspace-vault.yml"
+
+# Path to workspace vault keyfile
+box_vault_keyfile: none

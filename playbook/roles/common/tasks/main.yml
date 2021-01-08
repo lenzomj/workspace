@@ -53,12 +53,28 @@
       box_has_gapmirror: "{{ _mstat.stat.exists }}"
       box_gapmirror_uri: "{{ _mstat.stat.path if _mstat.stat.exists else 'none' }}"
 
-  - name: Creating mirror cache, if it does not exist
+  - name: Creating mirror cache directory, if it does not exist
     file:
       path: "{{ box_cache_path }}"
       state: directory
+
+  - name: Creating workspace vault file, if it does not exist
+    copy:
+      content: ""
+      dest: "{{ box_vault_path }}"
+      force: false
+
+  - name: Checking for a workspace vault keyfile
+    stat:
+      path: "{{ box_airgap_mount_path }}/vault/workspace.keys"
+    register: _kstat
 
   - name: Consolidating facts
     set_fact:
       box_has_mirror: (box_has_netmirror or box_has_gapmirror)
       box_mirror_uri: "{{ box_gapmirror_uri }}"
+      box_vault_keyfile: "{{ _kstat.stat.path if _kstat.stat.exists else 'none' }}"
+
+  - name: Including encrypted vault variables
+    include_vars:
+      file: "{{ box_vault_path }}"
