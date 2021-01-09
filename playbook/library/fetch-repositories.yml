@@ -1,14 +1,12 @@
 ---
 # library :: fetch-repositories
 
-  - name: >
-      Fetching repositories from
-      {{ box_has_internet | ternary('upstream', box_mirror_uri) }}
+  - name: "Fetching public repositories from upstream"
     when:
       - box_allow_fetch
-      - box_has_internet or box_has_mirror
+      - box_has_internet
     git:
-      repo: "{{ _repo }}"
+      repo: "{{ item.upstream }}"
       dest: "{{ _dest }}"
       bare: yes
       clone: yes
@@ -17,7 +15,47 @@
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ item.args.cache | default(box_cache_path) }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ repositories | selectattr('args.password', 'undefined') }}"
+    loop_control:
+      label: "{{ item.upstream }}"
+
+  - name: "Fetching password-protected repositories from upstream"
+    no_log: true
+    when:
+      - box_allow_fetch
+      - box_has_internet
+    git:
+      repo: "{{ _repo }}"
+      dest: "{{ _dest }}"
+      bare: yes
+      clone: yes
+      update: yes
+    vars:
+      _scheme: "{{ item.upstream | urlsplit('scheme') }}"
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
+      _cache_path: "{{ item.args.cache | default(box_cache_path) }}"
+      _repo: "{{ _scheme }}://{{ item.args.username }}:{{ item.args.password | urlencode }}@{{ _host }}{{ _path }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop: "{{ repositories | selectattr('args.password', 'defined') }}"
+
+  - name: "Fetching repositories from mirror"
+    when:
+      - box_allow_fetch
+      - box_has_mirror and not box_has_internet
+    git:
+      repo: "{{ _mirror_path }}"
+      dest: "{{ _dest }}"
+      bare: yes
+      clone: yes
+      update: yes
+    vars:
+      _host: "{{ item.upstream | urlsplit('hostname') }}"
+      _path: "{{ item.upstream | urlsplit('path') }}"
       _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
-      _repo: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
+      _cache_path: "{{ item.args.cache | default(box_cache_path) }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories }}"
+    loop_control:
+      label: "{{ _mirror_path }}"
