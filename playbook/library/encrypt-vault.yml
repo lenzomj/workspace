@@ -21,6 +21,7 @@
     loop: "{{ _variables.results }}"
 
   - name: "Stashing encrypted {{ vault_name }} vault data in {{ box_vault_path }}"
+    no_log: true
     blockinfile:
       path: "{{ box_vault_path }}"
       marker: "# {mark} {{ vault_name }}:{{ item.key }}"
