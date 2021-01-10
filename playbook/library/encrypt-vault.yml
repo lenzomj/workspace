@@ -15,15 +15,16 @@
     no_log: true
     command: >
       ansible-vault encrypt_string {{ item.user_input }} \
-                    --vault-id {{ vault_name }}@{{ box_vault_keyfile }} \
+                    --vault-id {{ vault_name }}@{{ box_vault_key_path }} \
                     --name {{ item.vault_var }}
     register: _ansible_vault_output
     loop: "{{ _variables.results }}"
 
-  - name: "Stashing encrypted {{ vault_name }} vault data in {{ box_vault_path }}"
+  - name: "Stashing encrypted {{ vault_name }} vault data in {{ box_local_vault_path }}"
     no_log: true
     blockinfile:
-      path: "{{ box_vault_path }}"
+      backup: yes
+      path: "{{ box_local_vault_path }}"
       marker: "# {mark} {{ vault_name }}:{{ item.key }}"
       block: "{{ item.value.stdout }}"
     with_dict: "{{ dict(vault_vars | zip(_ansible_vault_output.results)) }}"

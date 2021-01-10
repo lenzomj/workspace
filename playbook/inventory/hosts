@@ -1,0 +1,11 @@
+localhost
+pegasus
+galactica
+
+[localbox]
+localhost
+pegasus
+galactica
+
+[standalonebox]
+galactica

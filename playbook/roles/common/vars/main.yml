@@ -1,21 +1,12 @@
 ---
 # common :: vars
 
-# Ansible Paths ###############################################################
+# Playbook Paths ##############################################################
 
 # Common ansible task collections
 box_task_library: "{{ playbook_dir }}/library"
 
-# Path to user workspace
-box_workspace_path: "{{ ansible_env.HOME }}/workspace"
-
-# Path to local data cache for fetch tasks
-box_cache_path: "{{ ansible_env.HOME }}/.workspace-cache"
-
 # Resources ###################################################################
-
-# Upstream status
-box_has_internet: false
 
 # Mirror status
 box_has_mirror: false
@@ -23,8 +14,6 @@ box_mirror_uri: none
 
 # Network (localhost) mirror status
 box_has_netmirror:  false
-box_netmirror_port: 8080
-box_netmirror_uri:  "http://localhost:{{ box_netmirror_port }}"
 
 # Airgap (external drive) mirror status
 box_has_gapmirror: false
@@ -32,15 +21,3 @@ box_gapmirror_uri: none
 
 box_has_airgap_mount: false
 box_airgap_mount_path: none
-box_airgap_mount_paths:
-  - /media/{{ lookup('env', 'USER') }}/Fortress
-  - /run/media/{{ lookup('env', 'USER') }}/Fortress
-  - /mnt/Fortress
-
-# Vault #######################################################################
-
-# Path to workspace vault
-box_vault_path: "{{ ansible_env.HOME }}/.workspace-vault.yml"
-
-# Path to workspace vault keyfile
-box_vault_keyfile: none

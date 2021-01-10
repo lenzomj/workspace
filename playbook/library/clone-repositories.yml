@@ -1,7 +1,7 @@
 ---
 # library :: clone-repositories
 
-  - name: "Cloning repositories from {{ box_cache_path }}"
+  - name: "Cloning repositories from {{ box_local_cache_path }}"
     git:
       repo: "{{ _cache_path }}"
       dest: "{{ item.args.clone }}"
@@ -11,7 +11,7 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories
               | selectattr('args.clone', 'defined')
            }}"

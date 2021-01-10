@@ -6,7 +6,7 @@ devbox:
     - repository: dotfiles
       upstream: https://github.com/lenzomj/dotfiles.git
       args:
-        clone: "{{ box_workspace_path }}/dotfiles"
+        clone: "{{ box_local_path }}/dotfiles"
         setup: "./install.sh {{ ansible_env.HOME }}"
 
     - repository: workspace

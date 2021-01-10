@@ -1,0 +1,10 @@
+---
+# group_vars :: localbox
+
+################################################################################
+# Ansible Defaults
+###############################################################################
+
+ansible_connection: local
+
+ansible_python_interpreter: "{{ ansible_playbook_python }}"

@@ -3,7 +3,7 @@
 
   - name: "Creating vagrant {{ item.args.template }} factory"
     file:
-      path: "{{ box_workspace_path }}/sandbox/factory/{{ item.args.template }}"
+      path: "{{ box_local_path }}/sandbox/factory/{{ item.args.template }}"
       state: directory
 
   - name: "Generating vagrant {{ item.args.template }} factory configurations"
@@ -11,7 +11,7 @@
       src: "{{ file.src }}"
       dest: "{{ _factory_path }}/{{ item.args.template }}/{{ file.path }}"
     vars:
-      _factory_path: "{{ box_workspace_path }}/sandbox/factory"
+      _factory_path: "{{ box_local_path }}/sandbox/factory"
     loop_control:
       loop_var: file
     with_filetree: "templates/{{ item.args.template }}"

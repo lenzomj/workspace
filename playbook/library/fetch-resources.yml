@@ -3,23 +3,23 @@
 
   - name: Creating cache directories as required
     when:
-      - box_allow_fetch
-      - box_has_internet or box_has_mirror
+      - ( box_has_internet or box_has_mirror )
+      - ( 'get' in box_fetch_allowlist )
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ resources }}"
 
   - name: >
       Fetching resources from
       {{ box_has_internet | ternary('upstream', box_mirror_uri) }}
     when:
-      - box_allow_fetch
-      - box_has_internet or box_has_mirror
+      - ( box_has_internet or box_has_mirror )
+      - ( 'get' in box_fetch_allowlist )
     get_url:
       url: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
       dest: "{{ _cache_path }}"
@@ -27,6 +27,6 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
       _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
     loop: "{{ resources }}"

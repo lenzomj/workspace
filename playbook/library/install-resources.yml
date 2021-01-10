@@ -12,7 +12,7 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*Debian')
@@ -29,7 +29,7 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*RedHat')
@@ -44,7 +44,7 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
       _handler: "extract.*{{ ansible_os_family }}"
     loop: "{{ resources
               | selectattr('handlers', 'defined')

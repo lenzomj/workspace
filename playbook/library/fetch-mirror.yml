@@ -3,25 +3,25 @@
 
   - name: Creating cache directories as required
     when:
-      - box_allow_fetch
-      - box_has_internet
+      - ( box_has_internet )
+      - ( 'rsync' in box_fetch_allowlist )
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
     vars:
       _host: "{{ item.mirror }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ mirrors }}"
 
   - name: Fetching mirrors from upstream
     when:
-      - box_allow_fetch
-      - box_has_internet
+      - ( box_has_internet )
+      - ( 'rsync' in box_fetch_allowlist )
     command: "rsync -avSHP --no-motd --delete {{ _opts }} {{ item.upstream }} {{ _local }}"
     vars:
       _host: "{{ item.mirror }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _local: "{{ box_cache_path }}/{{ _host }}{{ _path | dirname }}"
+      _local: "{{ box_local_cache_path }}/{{ _host }}{{ _path | dirname }}"
       _opts: "{{ item.options | default('', true) }}"
     loop: "{{ mirrors  }}"

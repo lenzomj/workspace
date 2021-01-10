@@ -16,7 +16,7 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _keyfile_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _keyfile_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ kubebox.resources
               | selectattr('resource', 'search', 'repo-key')
            }}"
