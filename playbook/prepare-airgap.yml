@@ -1,9 +1,53 @@
 ---
-- name: Prepare Airgap
-  hosts: localhost
+- name: Prepare airgap payload
+  hosts: "{{ _target }}"
   roles:
-    - fetchbox
+    - common
+  vars_prompt:
+    - name: _target
+      prompt: Prepare airgap payload from host
+      default: "localhost"
+      private: no
+    - name: _fast_fetch
+      prompt: Skip slow fetch tasks (pip and rsync)?
+      default: no
+      private: no
+    - name: _push_to_airgap
+      prompt: Push payload to airgap drive?
+      default: yes
+      private: no
   tasks:
+    - name: Verifying permitted fetch protocols
+      when: ( _fast_fetch )
+      set_fact:
+        box_fetch_allowlist: [ 'get', 'git' ]
+
+    - name: Searching for fetchable tasks across roles
+      find:
+        paths: "{{ item }}"
+        patterns: "fetch.yml"
+        recurse: yes
+        file_type: "file"
+      with_items:
+        - "roles"
+        - "{{ box_local_roles_path }}"
+      register: _role_paths
+
+    - name: Fetching resources required for all roles
+      include_role:
+        name: "{{ _role }}"
+        tasks_from: fetch
+      vars:
+        _role: "{{ _role_path.1.path
+                   | regex_search('.+/(.+)/tasks/fetch.yml', '\\1')
+                   | first
+                }}"
+      with_subelements:
+        - "{{ _role_paths.results | selectattr('matched', 'greaterthan', 0) }}"
+        - "files"
+      loop_control:
+        loop_var: _role_path
+
     - name: "Pushing {{ box_local_cache_path }} to {{ box_gapmirror_uri }}"
-      when: (box_has_gapmirror)
+      when: ( _push_to_airgap and box_has_gapmirror)
       command: "rsync -avSHP --delete {{ box_local_cache_path }}/ {{ box_gapmirror_uri }}"

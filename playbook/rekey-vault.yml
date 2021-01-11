@@ -10,7 +10,7 @@
         file_type: "file"
       with_items:
         - "roles"
-        - "roles_extended"
+        - "{{ box_local_roles_path }}"
       register: _role_paths
 
       #TODO: Allow selection to rekey individual roles

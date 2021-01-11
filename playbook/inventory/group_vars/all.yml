@@ -5,9 +5,6 @@
 # Global Paths
 ###############################################################################
 
-# Path to workspace playbook and tools
-box_workspace_path: "{{ ansible_env.HOME }}/workspace"
-
 # Path to local workspace data
 box_local_path: "{{ ansible_env.HOME }}/.workspace-local"
 
