@@ -1,8 +1,6 @@
 ---
-
-- name: Provision Rootless
+- name: Provision rootless host
   hosts: localhost
   roles:
     - uselessbox
     - devbox
-    - fetchbox

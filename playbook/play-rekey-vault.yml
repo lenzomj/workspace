@@ -1,6 +1,13 @@
-- hosts: localhost
+---
+- name: Rekey vault
+  hosts: "{{ _target }}"
   roles:
     - common
+  vars_prompt:
+    - name: _target
+      prompt: Rekey vault on host
+      default: "localhost"
+      private: no
   tasks:
     - name: Searching for encryption tasks across roles
       find:
@@ -14,13 +21,6 @@
       register: _role_paths
 
       #TODO: Allow selection to rekey individual roles
-    - name: "Rekey vault data for which roles?"
-      when: false
-      pause:
-        prompt: "Vault ID(s)"
-        echo: true
-      register: _vault_ids
-
     - name: Rekeying vault data required for other roles
       include_role:
         name: "{{ _role }}"
