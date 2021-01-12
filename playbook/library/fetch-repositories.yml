@@ -18,7 +18,7 @@
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories | selectattr('args.password', 'undefined') }}"
     loop_control:
-      label: "{{ item.upstream }}"
+      label: "{{ _dest }}"
 
   - name: "Fetching password-protected repositories from upstream"
     no_log: true
@@ -60,4 +60,4 @@
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories }}"
     loop_control:
-      label: "{{ _mirror_path }}"
+      label: "{{ _dest }}"

@@ -8,12 +8,15 @@
       remote: origin
       clone: yes
       update: yes
+      force: "{{ item.args.force | default(false) }}"
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
       _repo: "{{ _cache_path }}/{{ _host }}{{ _path }}"
       _dest: "{{ item.args.clone }}"
+    loop_control:
+      label: "{{ _dest }}"
     loop: "{{ repositories
               | selectattr('args.clone', 'defined')
            }}"
@@ -28,6 +31,8 @@
       chdir: "{{ item.args.clone }}"
     register: _result
     changed_when: _result.stdout | regex_search("Added upstream remote")
+    loop_control:
+      label: "{{ item.args.clone }}"
     loop: "{{ repositories
               | selectattr('args.clone', 'defined')
            }}"
@@ -36,6 +41,8 @@
     command: "{{ item.args.setup }}"
     args:
       chdir: "{{ item.args.clone }}"
+    loop_control:
+      label: "{{ item.args.clone }}"
     loop: "{{ repositories
               | selectattr('args.clone', 'defined')
               | selectattr('args.setup', 'defined')
