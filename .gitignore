@@ -1,4 +1,2 @@
-dotfiles/*
-devbox/*
-sandbox/*
+playbook/scratch.yml
 .DS_Store

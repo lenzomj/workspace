@@ -1,0 +1,78 @@
+---
+- name: Prepare airgap payload
+  hosts: "{{ _target }}"
+  roles:
+    - common
+  vars_prompt:
+    - name: _target
+      prompt: Prepare airgap payload from host
+      default: "localhost"
+      private: no
+    - name: _push_to_airgap
+      prompt: Push payload to airgap drive?
+      default: no
+      private: no
+  tasks:
+    - name: Searching for fetchable tasks across roles
+      find:
+        paths: "{{ item }}"
+        patterns: "fetch.yml"
+        recurse: yes
+        file_type: "file"
+      with_items:
+        - "roles"
+        - "{{ box_local_roles_path }}"
+      register: _role_paths
+
+    - name: Confirming play
+      pause:
+        prompt: |
+
+          Prepare airgap payload
+          ----------------------
+          > Host:    {{ _target }}
+
+          *Fetch Tasks*
+          > Using:   {{ box_fetch_allowlist }}
+          > Cache:   {{ box_local_cache_path }}
+
+          *Sync Tasks*
+          > Push:    {{ _push_to_airgap }}
+          > Mirror:  {{ box_gapmirror_uri }}
+          > Exclude: {{ box_sync_excludelist }}
+          Proceed (Yes or No?)
+        echo: true
+      register: _proceed
+
+    - name: Confirming play
+      when: ( _proceed.user_input | bool != true )
+      fail:
+        msg: "Cancelled by user"
+
+    - name: Fetching resources required for all roles
+      include_role:
+        name: "{{ _role }}"
+        tasks_from: fetch
+      vars:
+        _role: "{{ _role_path.1.path
+                   | regex_search('.+/(.+)/tasks/fetch.yml', '\\1')
+                   | first
+                }}"
+      with_subelements:
+        - "{{ _role_paths.results | selectattr('matched', 'greaterthan', 0) }}"
+        - "files"
+      loop_control:
+        loop_var: _role_path
+
+    - name: "Pushing {{ box_local_cache_path }} to {{ box_gapmirror_uri }}"
+      when: ( _push_to_airgap and box_has_gapmirror)
+      command: "rsync {{ _baseopts}} {{ _excludes }} {{ _source }} {{ _dest }}"
+      vars:
+        _baseopts: "-avSHP --delete"
+        _excludes: "{{ ['--exclude ']
+                       | product(box_sync_excludelist)
+                       | map('join')
+                       | list
+                       | join(' ') }}"
+        _source: "{{ box_local_cache_path }}/"
+        _dest:   "{{ box_gapmirror_uri }}"

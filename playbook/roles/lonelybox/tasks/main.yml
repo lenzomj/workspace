@@ -3,20 +3,3 @@
 
   - import_tasks: "lonelybox-centos.yml"
     when: (ansible_distribution == "CentOS")
-
-  - name: Verifing base packages
-    become: true
-    package:
-      name:
-        - python
-        - python3
-        - git
-        - rsync
-        - curl
-      state: present
-
-  - name: Updating installed packages to latest
-    become: true
-    package:
-      name: '*'
-      state: latest

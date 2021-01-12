@@ -20,10 +20,10 @@
 
   "builders": [
     {
-      "box_name": "{{ item.args.base_box }}",
-      "source_path": "{{ item.args.base_box }}",
+      "box_name": "{{ _rcs.args.base_box }}",
+      "source_path": "{{ _rcs.args.base_box }}",
       "add_force": true,
-      "output_dir": "{{ box_workspace_path }}/sandbox/boxes/{{ item.args.template}}",
+      "output_dir": "{{ box_local_path }}/sandbox/boxes/{{ _rcs.args.template}}",
       "provider": "virtualbox",
       "template": "Vagrantfile",
       "type": "vagrant",

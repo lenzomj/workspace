@@ -6,16 +6,15 @@
   - import_tasks: "{{ box_task_library }}/install-pypackages.yml"
     vars:
       a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"
-      a_virtualenv_path: "{{ box_workspace_path }}/devbox"
+      a_virtualenv_path: "{{ box_local_path }}/devbox"
 
   - import_tasks: "{{ box_task_library }}/clone-repositories.yml"
     vars:
       repositories: "{{ devbox.repositories }}"
 
-  - name: >
-      Configuring vim to always update plugins from {{ box_workspace_cache }}
-    lineinfile:
+  - name: "Configuring vim to always update plugins from {{ box_local_cache_path }}"
+    blockinfile:
+      create: true
       path: "{{ ansible_env.HOME }}/.bashrc_local"
-      state: present
-      create: yes
-      line: 'export VIM_PLUG_CACHE="{{ box_cache_path }}"'
+      marker: "# {mark} MANAGED BLOCK (devbox)"
+      block: 'export VIM_PLUG_CACHE="{{ box_local_cache_path }}"'

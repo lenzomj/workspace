@@ -5,8 +5,9 @@ devbox:
   repositories:
     - repository: dotfiles
       upstream: https://github.com/lenzomj/dotfiles.git
-      clone: "{{ box_workspace_path }}/dotfiles"
-      setup: "./install.sh {{ ansible_env.HOME }}"
+      args:
+        clone: "{{ box_local_path }}/dotfiles"
+        setup: "./install.sh {{ ansible_env.HOME }}"
 
     - repository: workspace
       upstream: https://github.com/lenzomj/workspace.git
@@ -37,3 +38,6 @@ devbox:
 
     - repository: vim-pencil
       upstream: https://github.com/reedes/vim-pencil.git
+
+    - repository: vim-fugitive
+      upstream: https://github.com/tpope/vim-fugitive.git

@@ -7,9 +7,9 @@
     register: _reqs
     failed_when: (not _reqs.stat.exists)
 
-  - name: Installing python packages from {{ box_cache_path }}
+  - name: "Installing python packages from {{ box_local_cache_path }}"
     pip:
       requirements: "{{ _reqs.stat.path }}"
       virtualenv: "{{ a_virtualenv_path }}"
-      extra_args: "--no-index --find-links=file://{{ box_cache_path }}/pypi.org"
+      extra_args: "--no-index --find-links=file://{{ box_local_cache_path }}/pypi.org"
       virtualenv_command: "{{ ansible_python_interpreter }} -m venv"

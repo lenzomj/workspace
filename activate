@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-box_workspace_path="${HOME}/workspace"
-box_bootstrap_path="${HOME}/.workspace-bootstrap"
+box_local_path="${HOME}/.workspace-local"
+box_bootstrap_path="${box_local_path}/bootstrap"
 
 my_os=`awk -F= '/^NAME/{print $2}' /etc/os-release`
 base_apps=( "curl" "rsync" "git" "python3")
@@ -14,21 +14,21 @@ if [[ "${my_os}" =~ "CentOS" ]]; then
 
   for app in "${base_apps[@]}"; do
     if [[ ! -x "$(command -v ${app})" ]]; then
-      mkdir -p "${box_workspace_path}/stage"
+      mkdir -p "${box_local_path}/stage"
       yumdownloader --archlist=x86_64 -x \*i686 \
-                    --destdir "${box_workspace_path}/stage" \
+                    --destdir "${box_local_path}/stage" \
                     --resolve "${app}"
     else
       which "${app}"
     fi
   done
 
-  if [[ -d "${box_workspace_path}/stage" ]]; then
+  if [[ -d "${box_local_path}/stage" ]]; then
     mkdir -p "${box_bootstrap_path}"
-    for f in ${box_workspace_path}/stage/*.rpm; do
+    for f in ${box_local_path}/stage/*.rpm; do
       (cd "${box_bootstrap_path}" && rpm2cpio "$f" | cpio -id)
     done
-    rm -rf "${box_workspace_path}/stage"
+    rm -rf "${box_local_path}/stage"
   fi
 
   if [[ -d "${box_bootstrap_path}" ]]; then

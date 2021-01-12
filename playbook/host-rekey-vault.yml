@@ -1,0 +1,38 @@
+---
+- name: Rekey vault
+  hosts: "{{ _target }}"
+  roles:
+    - common
+  vars_prompt:
+    - name: _target
+      prompt: Rekey vault on host
+      default: "localhost"
+      private: no
+  tasks:
+    - name: Searching for encryption tasks across roles
+      find:
+        paths: "{{ item }}"
+        patterns: "rekey.yml"
+        recurse: yes
+        file_type: "file"
+      with_items:
+        - "roles"
+        - "{{ box_local_roles_path }}"
+      register: _role_paths
+
+      #TODO: Allow selection to rekey individual roles
+    - name: Rekeying vault data required for other roles
+      include_role:
+        name: "{{ _role }}"
+        tasks_from: rekey
+        vars_from: vault
+      vars:
+        _role: "{{ _role_path.1.path
+                   | regex_search('.+/(.+)/tasks/rekey.yml', '\\1')
+                   | first
+                }}"
+      with_subelements:
+        - "{{ _role_paths.results | selectattr('matched', 'greaterthan', 0) }}"
+        - "files"
+      loop_control:
+        loop_var: _role_path

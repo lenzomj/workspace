@@ -1,22 +1,33 @@
 ---
 # common :: tasks
 
-  - name: Consolidating facts about configuation options
-    set_fact:
-      box_allow_fetch: "{{ box_allow_fetch | default(true) | bool }}"
+  - name: "Creating {{ box_local_path }} directory structure"
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - "{{ box_local_cache_path }}"
+      - "{{ box_local_inventory_path }}"
+      - "{{ box_local_roles_path }}"
+      - "{{ box_local_path }}/vault"
 
-  # TODO: Iterate over a list of vars to check multiple URLs
-  - name: Checking for access to upstream resources
-    ignore_errors: true
-    uri:
-      url: https://github.com
-      follow_redirects: safe
-      method: GET
-    register: _rget_upstream
-    until: (_rget_upstream.status == 200)
-    failed_when: false
-    retries: 2
-    delay: 0.5
+  - name: "Creating {{ box_local_vault_path }}, if it does not exist"
+    copy:
+      content: ""
+      dest: "{{ box_local_vault_path }}"
+      force: false
+
+  - name: "Creating {{ box_local_inventory_path }}/hosts, if it does not exist"
+    copy:
+      content: ""
+      dest: "{{ box_local_inventory_path }}/hosts"
+      force: false
+
+  - name: Generating default workspace configuration file
+    template:
+      src: "configuration.yml"
+      dest: "{{ box_local_config_path }}"
+      force: false # Do not overwrite existing
 
   - name: Checking for a local network mirror
     ignore_errors: true
@@ -32,10 +43,9 @@
 
   - name: Consolidating facts about networked resources
     set_fact:
-      box_has_internet: "{{ (_rget_upstream.status == 200) | bool }}"
       box_has_netmirror: "{{ (_rget_localhost.status == 200) | bool }}"
 
-    #TODO: Use a filter to narrow down candiates
+    #TODO: Use a filter to narrow down candidates
   - name: Checking for an airgap drive
     with_items: "{{ ansible_mounts }}"
     when: item.mount in box_airgap_mount_paths
@@ -53,12 +63,21 @@
       box_has_gapmirror: "{{ _mstat.stat.exists }}"
       box_gapmirror_uri: "{{ _mstat.stat.path if _mstat.stat.exists else 'none' }}"
 
-  - name: Creating mirror cache, if it does not exist
-    file:
-      path: "{{ box_cache_path }}"
-      state: directory
+  - name: Checking for a workspace vault keyfile
+    stat:
+      path: "{{ box_airgap_mount_path }}/vault/workspace.keys"
+    register: _kstat
 
   - name: Consolidating facts
     set_fact:
       box_has_mirror: (box_has_netmirror or box_has_gapmirror)
       box_mirror_uri: "{{ box_gapmirror_uri }}"
+      box_vault_key_path: "{{ _kstat.stat.path if _kstat.stat.exists else 'none' }}"
+
+  - name: Including encrypted vault variables
+    include_vars:
+      file: "{{ box_local_vault_path }}"
+
+  - name: Including workspace configuration
+    include_vars:
+      file: "{{ box_local_config_path }}"

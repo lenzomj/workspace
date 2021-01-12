@@ -3,11 +3,11 @@
 
 Vagrant.configure("2") do |config|
   config.vm.define "source", autostart: false do |source|
-   source.vm.box = "{{ item.args.base_box }}"
+   source.vm.box = "{{ _rcs.args.base_box }}"
 	config.ssh.insert_key = false
   end
   config.vm.define "output" do |output|
-   output.vm.box = "{{ item.args.pack_box }}"
+   output.vm.box = "{{ _rcs.args.pack_box }}"
 	output.vm.box_url = "file://package.box"
 	config.ssh.insert_key = false
   end

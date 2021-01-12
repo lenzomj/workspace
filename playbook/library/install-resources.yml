@@ -5,14 +5,16 @@
     become: true
     when:
       - (ansible_os_family == "Debian")
-      - (item.requires | default(true, true))
+      - (_rcs.requires | default(true, true))
     apt:
       deb: "{{ _cache_path }}"
       state: present
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*Debian')
@@ -22,14 +24,17 @@
     become: true
     when:
       - (ansible_os_family == "RedHat")
-      - (item.requires | default(true, true))
+      - (_rcs.requires | default(true, true))
     package:
       name: "{{ _cache_path }}"
       state: present
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      ansible_python_interpreter: "/usr/bin/env python"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*RedHat')
@@ -37,15 +42,17 @@
 
   - name: Extracting archived resources
     when:
-      - (item.requires | default(true, true))
+      - (_rcs.requires | default(true, true))
     unarchive:
       src: "{{ _cache_path }}"
-      dest: "{{ item.argument }}"
+      dest: "{{ _rcs.argument }}"
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
       _handler: "extract.*{{ ansible_os_family }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', _handler)

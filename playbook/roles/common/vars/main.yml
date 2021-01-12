@@ -1,26 +1,23 @@
 ---
 # common :: vars
 
-box_has_airgap_mount: false
-box_airgap_mount_path: none
-box_airgap_mount_paths:
-  - /media/{{ lookup('env', 'USER') }}/Fortress
-  - /run/media/{{ lookup('env', 'USER') }}/Fortress
-  - /mnt/Fortress
+# Playbook Paths ##############################################################
 
-box_has_internet: false
-box_has_netmirror: false
-box_has_gapmirror: false
+# Common ansible task collections
+box_task_library: "{{ playbook_dir }}/library"
+
+# Resources ###################################################################
+
+# Mirror status
 box_has_mirror: false
-
-box_gapmirror_uri: none
-box_netmirror_port: 8080
-box_netmirror_uri: "http://localhost:{{ box_netmirror_port }}"
 box_mirror_uri: none
 
-box_cache_path: "{{ ansible_env.HOME }}/.workspace-cache"
-box_workspace_path: "{{ ansible_env.HOME }}/workspace"
+# Network (localhost) mirror status
+box_has_netmirror:  false
 
-box_distro: unknown
+# Airgap (external drive) mirror status
+box_has_gapmirror: false
+box_gapmirror_uri: none
 
-box_task_library: "{{ playbook_dir }}/library"
+box_has_airgap_mount: false
+box_airgap_mount_path: none

@@ -1,8 +1,0 @@
-- hosts: localhost
-  gather_facts: yes
-  become: no
-  # TODO: Establish role dependencies
-  roles:
-    - role: devbox
-      #- role: fetchbox
-    #- role: sandbox

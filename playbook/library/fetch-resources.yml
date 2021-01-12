@@ -3,30 +3,52 @@
 
   - name: Creating cache directories as required
     when:
-      - box_allow_fetch
-      - box_has_internet or box_has_mirror
+      - ( box_has_internet or box_has_mirror )
+      - ( 'get' in box_fetch_allowlist )
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources }}"
 
-  - name: >
-      Fetching resources from
-      {{ box_has_internet | ternary('upstream', box_mirror_uri) }}
+  - name: "Fetching public resources from upstream"
     when:
-      - box_allow_fetch
-      - box_has_internet or box_has_mirror
+      - ( box_has_internet )
+      - ( 'get' in box_fetch_allowlist )
     get_url:
-      url: "{{ box_has_internet | ternary(item.upstream, _mirror_path) }}"
-      dest: "{{ _cache_path }}"
-      checksum: "{{ item.checksum }}"
+      url: "{{ _rcs.upstream }}"
+      dest: "{{ _dest }}"
+      checksum: "{{ _rcs.checksum }}"
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_cache_path }}/{{ _host }}{{ _path }}"
-      _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
+    loop: "{{ resources }}"
+
+    #TODO: Fetching password-protected resources from upstream
+
+  - name: "Fetching resources from mirror"
+    when:
+      - ( box_has_mirror and not box_has_internet )
+      - ( 'get' in box_fetch_allowlist )
+    get_url:
+      url: "{{ _mirror_path }}"
+      dest: "{{ _dest }}"
+      checksum: "{{ _rcs.checksum }}"
+    vars:
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _mirror_path: "file://{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources }}"

@@ -1,0 +1,19 @@
+---
+- name: Prepare vagrant box factory
+  hosts: "{{ _target }}"
+  roles:
+    - common
+  vars_prompt:
+    - name: _target
+      prompt: Prepare vagrant box factory on host
+      default: "localhost"
+      private: no
+  tasks:
+    - name: Checking availability of networked resources
+      fail:
+        msg: This play requires networked resources
+      when: not (box_has_internet or box_has_netmirror)
+
+    - name: Including sandbox role
+      include_role:
+        name: "sandbox"

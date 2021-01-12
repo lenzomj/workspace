@@ -1,0 +1,72 @@
+---
+# group_vars :: all
+
+###############################################################################
+# Global Paths
+###############################################################################
+
+# Path to local workspace data
+box_local_path: "{{ ansible_env.HOME }}/.workspace-local"
+
+# Path to local workspace configuratoin
+box_local_config_path: "{{ box_local_path }}/configuration.yml"
+
+# Path to local data cache
+box_local_cache_path: "{{ box_local_path }}/cache"
+
+# Path to local inventory
+box_local_inventory_path: "{{ box_local_path }}/inventory"
+
+# Path to local roles
+box_local_roles_path: "{{ box_local_path }}/roles"
+
+# Path to local vault
+box_local_vault_path: "{{ box_local_path }}/vault/vault.yml"
+
+###############################################################################
+# Host-Specific Paths
+###############################################################################
+
+# Path to workspace vault keyfile
+box_vault_key_path: not_set
+
+# Path to airgap drive mount
+box_airgap_mount_path: not_set
+
+###############################################################################
+# Global Resources
+###############################################################################
+
+box_netmirror_port: 8080
+box_netmirror_uri:  "http://localhost:{{ box_netmirror_port }}"
+
+###############################################################################
+# Host-Specific Resources
+###############################################################################
+
+# Can this host elevate privileges?
+box_has_sudo: true
+
+# Does this host have access to upstream internet resources?
+box_has_internet: true
+
+# What are the potential mount paths for an airgap drive?
+box_airgap_mount_paths: [ ]
+
+###############################################################################
+# Host-Specific Configuration
+###############################################################################
+
+# Default fetch allowlists
+box_fetch_allowlists:
+  none:     [ ]
+  all:      [ 'get','git', 'pip', 'rsync' ]
+  dev:      [ 'get', 'git', 'pip' ]
+  get_git:  [ 'get', 'git' ]
+  git:      [ 'git' ]
+
+# What is the default fetch allowlist?
+box_fetch_allowlist: "{{ box_fetch_allowlists.all }}"
+
+# What is the default sync denylist?
+box_sync_excludelist: [ ]

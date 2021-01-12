@@ -1,0 +1,16 @@
+---
+# host_vars :: triton
+
+###############################################################################
+# Host-Specific Resources
+###############################################################################
+
+# Override
+box_airgap_mount_paths:
+  - /run/media/{{ lookup('env', 'USER') }}/Fortress
+
+# Override
+box_fetch_allowlist: "{{ box_fetch_allowlists.dev }}"
+
+# Override
+box_has_sudo: false
