@@ -1,7 +1,0 @@
----
-- name: Provision pegasus host
-  hosts: pegasus
-  roles:
-    - devbox
-    - sandbox
-    - kubebox

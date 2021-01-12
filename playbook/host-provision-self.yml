@@ -27,7 +27,9 @@
     - name: Provisioning advanced roles
       when: ( box_has_sudo)
       include_role:
-        name: "{{ item }}"
+        name: "{{ _role_name }}"
+      loop_control:
+        loop_var: _role_name
       with_items:
         - sandbox
         - kubebox
