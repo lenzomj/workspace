@@ -44,7 +44,10 @@ box_netmirror_uri:  "http://localhost:{{ box_netmirror_port }}"
 # Host-Specific Resources
 ###############################################################################
 
-# Should this host have access to upstream internet resources?
+# Can this host elevate privileges?
+box_has_sudo: true
+
+# Does this host have access to upstream internet resources?
 box_has_internet: true
 
 # What are the potential mount paths for an airgap drive?
@@ -57,7 +60,8 @@ box_airgap_mount_paths: [ ]
 # Default fetch allowlists
 box_fetch_allowlists:
   none:     [ ]
-  all:      [ 'get','git', 'pip', 'rsync']
+  all:      [ 'get','git', 'pip', 'rsync' ]
+  dev:      [ 'get', 'git', 'pip' ]
   get_git:  [ 'get', 'git' ]
   git:      [ 'git' ]
 

@@ -17,12 +17,13 @@
     when: (not _box_exists)
     shell: "vagrant box add --force {{ _base_box }} {{ _cache_path }}"
     vars:
-      #_box_name: "{{ item.resource.split('-')[2] | lower }}"
-      _base_box: "{{ item.args.base_box }}"
+      _base_box: "{{ _rcs.args.base_box }}"
       _box_exists: "{{ _vagrant_boxes.stdout | regex_search(_base_box) }}"
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ sandbox.resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'vagrant-add')
@@ -30,6 +31,8 @@
 
   - name: Creating vagrant box factory
     include_tasks: generate-boxfactory.yml
+    loop_control:
+      loop_var: _rcs
     loop: "{{ sandbox.resources
               | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'vagrant-package')

@@ -9,9 +9,11 @@
       path: "{{ _cache_path | dirname }}"
       state: directory
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources }}"
 
   - name: "Fetching public resources from upstream"
@@ -19,14 +21,16 @@
       - ( box_has_internet )
       - ( 'get' in box_fetch_allowlist )
     get_url:
-      url: "{{ item.upstream }}"
+      url: "{{ _rcs.upstream }}"
       dest: "{{ _dest }}"
-      checksum: "{{ item.checksum }}"
+      checksum: "{{ _rcs.checksum }}"
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
-      _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources }}"
 
     #TODO: Fetching password-protected resources from upstream
@@ -38,11 +42,13 @@
     get_url:
       url: "{{ _mirror_path }}"
       dest: "{{ _dest }}"
-      checksum: "{{ item.checksum }}"
+      checksum: "{{ _rcs.checksum }}"
     vars:
-      _host: "{{ item.upstream | urlsplit('hostname') }}"
-      _path: "{{ item.upstream | urlsplit('path') }}"
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
       _mirror_path: "file://{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
-      _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
     loop: "{{ resources }}"

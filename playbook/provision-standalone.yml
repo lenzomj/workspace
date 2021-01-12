@@ -1,9 +1,0 @@
----
-# ansible-playbook -e 'ansible_python_interpreter=/usr/bin/python' -K playbook/provision-standalone.yml
-- name: Provision galactica host
-  hosts: galactica
-  roles:
-    - lonelybox
-    - devbox
-    - sandbox
-    - kubebox

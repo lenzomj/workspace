@@ -9,7 +9,8 @@
 box_airgap_mount_paths:
   - /run/media/{{ lookup('env', 'USER') }}/Fortress
 
-box_fetch_allowlist:
-  - 'get'
-  - 'git'
-  - 'pip'
+# Override
+box_fetch_allowlist: "{{ box_fetch_allowlists.dev }}"
+
+# Override
+box_has_sudo: false

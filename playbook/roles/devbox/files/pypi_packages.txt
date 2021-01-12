@@ -1,4 +1,5 @@
 ansible
+selinux
 ansible-lint
 sphinx
 sphinx_rtd_theme
