@@ -1,0 +1,5 @@
+---
+
+# Workspace configuration options and overrides
+
+#box_fetch_allowlist: "{{ box_fetch_allowlists.get_git }}"

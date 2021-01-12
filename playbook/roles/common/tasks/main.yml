@@ -16,6 +16,12 @@
       dest: "{{ box_local_vault_path }}"
       force: false
 
+  - name: Generating default workspace configuration file
+    template:
+      src: "configuration.yml"
+      dest: "{{ box_local_config_path }}"
+      force: false # Do not overwrite existing
+
   - name: Checking for a local network mirror
     ignore_errors: true
     uri:
@@ -32,7 +38,7 @@
     set_fact:
       box_has_netmirror: "{{ (_rget_localhost.status == 200) | bool }}"
 
-    #TODO: Use a filter to narrow down candiates
+    #TODO: Use a filter to narrow down candidates
   - name: Checking for an airgap drive
     with_items: "{{ ansible_mounts }}"
     when: item.mount in box_airgap_mount_paths
@@ -64,3 +70,7 @@
   - name: Including encrypted vault variables
     include_vars:
       file: "{{ box_local_vault_path }}"
+
+  - name: Including workspace configuration
+    include_vars:
+      file: "{{ box_local_config_path }}"
