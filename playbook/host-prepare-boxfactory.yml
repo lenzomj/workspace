@@ -8,16 +8,7 @@
       prompt: Prepare vagrant box factory on host
       default: "localhost"
       private: no
-    - name: _no_fetch
-      prompt: Skip fetch tasks?
-      default: no
-      private: no
   tasks:
-    - name: Verifying permitted fetch protocols
-      when: ( _no_fetch )
-      set_fact:
-        box_fetch_allowlist: [ ]
-
     - name: Checking availability of networked resources
       fail:
         msg: This play requires networked resources
