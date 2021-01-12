@@ -27,6 +27,7 @@
       name: "{{ _cache_path }}"
       state: present
     vars:
+      ansible_python_interpreter: "/usr/bin/env python"
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"

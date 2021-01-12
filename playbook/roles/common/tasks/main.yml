@@ -9,11 +9,18 @@
       - "{{ box_local_cache_path }}"
       - "{{ box_local_inventory_path }}"
       - "{{ box_local_roles_path }}"
+      - "{{ box_local_path }}/vault"
 
   - name: "Creating {{ box_local_vault_path }}, if it does not exist"
     copy:
       content: ""
       dest: "{{ box_local_vault_path }}"
+      force: false
+
+  - name: "Creating {{ box_local_inventory_path }}/hosts, if it does not exist"
+    copy:
+      content: ""
+      dest: "{{ box_local_inventory_path }}/hosts"
       force: false
 
   - name: Generating default workspace configuration file

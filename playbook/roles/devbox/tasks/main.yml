@@ -14,6 +14,7 @@
 
   - name: "Configuring vim to always update plugins from {{ box_local_cache_path }}"
     blockinfile:
+      create: true
       path: "{{ ansible_env.HOME }}/.bashrc_local"
       marker: "# {mark} MANAGED BLOCK (devbox)"
       block: 'export VIM_PLUG_CACHE="{{ box_local_cache_path }}"'

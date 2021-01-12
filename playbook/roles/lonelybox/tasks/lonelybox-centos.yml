@@ -12,50 +12,68 @@
         block: |
           [mirror-base]
           name=CentOS-$releasever - Base Mirror
-          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
+          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
           gpgcheck=1
           enabled=1
 
           [mirror-updates]
           name=CentOS-$releasever - Updates Mirror
-          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
+          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
           gpgcheck=1
           enabled=1
 
           [mirror-extras]
           name=CentOS-$releasever - Extras Mirror
-          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
+          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
           gpgcheck=1
           enabled=1
 
           [mirror-centos-sclo-rh]
           name=CentOS-7 - SCLo rh Mirror
-          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
+          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-SCLo
           gpgcheck=1
           enabled=1
 
           [mirror-epel]
           name=EPEL-$releasever - $basearch Mirror
-          baseurl={{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
+          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
           gpgcheck=1
           enabled=1
 
     - name: Adding extra CentOS-7 mirror repository keys
       become: true
+      vars:
+        ansible_python_interpreter: "/usr/bin/env python"
       package:
         name:
           - centos-release-scl
           - epel-release
         state: present
 
-    - name: Verifing base packages
+    - name: Verifying base packages
       become: true
+      vars:
+        ansible_python_interpreter: "/usr/bin/env python"
       package:
         name:
           - "@Development tools"
+          - python
+          - python3
+          - libselinux-python3
+          - git
+          - rsync
+          - curl
         state: present
+
+    - name: Updating installed packages to latest
+      become: true
+      vars:
+        ansible_python_interpreter: "/usr/bin/env python"
+      package:
+        name: '*'
+        state: latest
