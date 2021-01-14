@@ -1,0 +1,8 @@
+---
+# common :: rekey
+
+  - import_tasks: "{{ box_task_library }}/encrypt-vault.yml"
+    when: ( lookup('vars', inventory_hostname, default=false) )
+    vars:
+      vault_name: "{{ inventory_hostname }}"
+      vault_vars: "{{ lookup('vars', '{{ inventory_hostname }}').vault_vars }}"

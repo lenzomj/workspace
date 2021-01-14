@@ -1,7 +1,34 @@
 ---
 # library :: encrypt-vault
 
+  - name: "Confirming {{ vault_name }} vault encryption task"
+    pause:
+      prompt: |
+
+        Encrypt vault
+        -------------
+        > Name:  {{ vault_name }}
+        > Vars:  {{ vault_vars }}
+
+        *Paths*
+        > Keys:  {{ box_vault_key_path }}
+        > Vault: {{ box_local_vault_path }}
+
+        {% if ansible_env.ANSIBLE_VAULT_PASSWORD_FILE is defined %}
+        *Warnings*
+        Environment variable ANSIBLE_VAULT_PASSWORD_FILE is set.
+        Only use the explict --vault-password-file option for this task.
+
+        bash$ unset ANSIBLE_VAULT_PASSWORD_FILE
+        bash$ ansible-playbook --vault-password-file={{ box_vault_key_path }}
+        {% endif %}
+        Proceed (Yes or No?)
+
+      echo: true
+    register: _proceed
+
   - name: "Obtaining {{ vault_name }} vault data"
+    when: ( _proceed.user_input | bool )
     no_log: true
     pause:
       prompt: "Value of {{ vault_var }}"
@@ -12,6 +39,7 @@
     loop: "{{ vault_vars }}"
 
   - name: "Encrypting {{ vault_name }} vault data"
+    when: ( _proceed.user_input | bool )
     no_log: true
     command: >
       ansible-vault encrypt_string {{ item.user_input }} \
@@ -21,6 +49,7 @@
     loop: "{{ _variables.results }}"
 
   - name: "Stashing encrypted {{ vault_name }} vault data in {{ box_local_vault_path }}"
+    when:  ( _proceed.user_input | bool )
     no_log: true
     blockinfile:
       backup: yes

@@ -8,3 +8,7 @@
 # Override
 box_airgap_mount_paths:
   - /media/{{ lookup('env', 'USER') }}/Fortress
+
+pegasus:
+  vault_vars:
+    - vault_pegasus_become_pass
