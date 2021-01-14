@@ -5,6 +5,12 @@
 # Global Paths
 ###############################################################################
 
+# Path to workspace
+box_workspace_path: "{{ ansible_env.HOME }}/workspace"
+
+# Path to workspace refs
+box_workspace_refs_path: "{{ box_workspace_path }}/refs"
+
 # Path to local workspace data
 box_local_path: "{{ ansible_env.HOME }}/.workspace-local"
 

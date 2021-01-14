@@ -23,6 +23,12 @@
       dest: "{{ box_local_inventory_path }}/hosts"
       force: false
 
+  - name: "Creating a symbolic link to {{ box_local_path }}"
+    file:
+      src: "{{ box_local_path }}"
+      dest: "{{ box_workspace_refs_path }}/local"
+      state: link
+
   - name: Generating default workspace configuration file
     template:
       src: "configuration.yml"
