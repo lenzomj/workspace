@@ -84,6 +84,13 @@
     include_vars:
       file: "{{ box_local_vault_path }}"
 
-  - name: Including workspace configuration
+  - name: Setting host become password from vault, if it exists
+    when: ( lookup('vars', 'vault_' + inventory_hostname + '_become_pass', default=false) )
+    vars:
+      _pass: "{{ lookup('vars', 'vault_' + inventory_hostname + '_become_pass') }}"
+    set_fact:
+      ansible_become_pass: "{{ _pass }}"
+
+  - name: Including workspace-specific configuration
     include_vars:
       file: "{{ box_local_config_path }}"
