@@ -8,6 +8,10 @@
       prompt: Format patches on host
       default: "localhost"
       private: no
+    - name: _push_to_airgap
+      prompt: Push patches to airgap drive?
+      default: no
+      private: no
   tasks:
     - name: Searching for patch tasks across roles
       find:
@@ -34,3 +38,14 @@
         - "files"
       loop_control:
         loop_var: _role_path
+
+    - name: Creating working directory on airgap drive
+      when: ( _push_to_airgap and box_has_airgap_mount )
+      file:
+        path: "{{ box_airgap_mount_path }}/working"
+        state: directory
+
+    - name: "Pushing {{ box_local_patch_path }} to airgap drive"
+      when: ( _push_to_airgap and box_has_airgap_mount )
+      command: |
+        cp -r {{ box_local_patch_path }} {{ box_airgap_mount_path }}/working/
