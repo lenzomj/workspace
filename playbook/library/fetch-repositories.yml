@@ -18,7 +18,7 @@
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories | selectattr('args.password', 'undefined') }}"
     loop_control:
-      label: "{{ item.upstream }}"
+      label: "{{ _dest }}"
 
   - name: "Fetching password-protected repositories from upstream"
     no_log: true
@@ -44,8 +44,9 @@
     when:
       - ( box_has_mirror and not box_has_internet )
       - ( 'git' in box_fetch_allowlist )
+      - ( _repo != _dest )
     git:
-      repo: "{{ _mirror_path }}"
+      repo: "{{ _repo }}"
       dest: "{{ _dest }}"
       bare: yes
       clone: yes
@@ -53,9 +54,10 @@
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
-      _mirror_path: "{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
+      _mirror_path: "{{ item.args.mirror | default(box_mirror_uri) }}"
       _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
+      _repo: "{{ _mirror_path }}/{{ _host }}{{ _path }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories }}"
     loop_control:
-      label: "{{ _mirror_path }}"
+      label: "{{ _dest }}"

@@ -7,10 +7,13 @@ devbox:
       upstream: https://github.com/lenzomj/dotfiles.git
       args:
         clone: "{{ box_local_path }}/dotfiles"
+        track: "{{ box_local_path }}/dotfiles"
         setup: "./install.sh {{ ansible_env.HOME }}"
 
     - repository: workspace
       upstream: https://github.com/lenzomj/workspace.git
+      args:
+        track: "{{ box_workspace_path }}"
 
     - repository: ctrlp.vim
       upstream: https://github.com/ctrlpvim/ctrlp.vim.git

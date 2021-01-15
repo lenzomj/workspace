@@ -7,6 +7,7 @@
       state: directory
     with_items:
       - "{{ box_local_cache_path }}"
+      - "{{ box_local_patch_path }}"
       - "{{ box_local_inventory_path }}"
       - "{{ box_local_roles_path }}"
       - "{{ box_local_path }}/vault"
@@ -22,6 +23,12 @@
       content: ""
       dest: "{{ box_local_inventory_path }}/hosts"
       force: false
+
+  - name: "Creating a symbolic link to {{ box_local_path }}"
+    file:
+      src: "{{ box_local_path }}"
+      dest: "{{ box_workspace_refs_path }}/local"
+      state: link
 
   - name: Generating default workspace configuration file
     template:
@@ -78,6 +85,13 @@
     include_vars:
       file: "{{ box_local_vault_path }}"
 
-  - name: Including workspace configuration
+  - name: Setting host become password from vault, if it exists
+    when: ( lookup('vars', 'vault_' + inventory_hostname + '_become_pass', default=false) )
+    vars:
+      _pass: "{{ lookup('vars', 'vault_' + inventory_hostname + '_become_pass') }}"
+    set_fact:
+      ansible_become_pass: "{{ _pass }}"
+
+  - name: Including workspace-specific configuration
     include_vars:
       file: "{{ box_local_config_path }}"

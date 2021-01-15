@@ -8,3 +8,7 @@
 # Override
 box_airgap_mount_paths:
   - /mnt/Fortress
+
+galactica:
+  vault_vars:
+    - vault_galactica_become_pass

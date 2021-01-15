@@ -8,6 +8,11 @@
       prompt: Provision host
       default: "localhost"
       private: no
+
+    - name: _roles
+      prompt: Provision additional roles
+      default: ""
+      private: no
   tasks:
 
     - name: Provisioning standalone host
@@ -27,9 +32,7 @@
     - name: Provisioning advanced roles
       when: ( box_has_sudo)
       include_role:
-        name: "{{ _role_name }}"
+        name: "{{ _role }}"
       loop_control:
-        loop_var: _role_name
-      with_items:
-        - sandbox
-        - kubebox
+        loop_var: _role
+      with_items: "{{ _roles.split(' ') }}"
