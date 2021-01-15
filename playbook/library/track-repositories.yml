@@ -1,0 +1,23 @@
+---
+# library :: track-repositories
+
+  - name: Formatting git patches for working branches
+    shell: |
+      for branch in $(git for-each-ref --format='%(refname)' refs/heads); do
+        if [[ "$branch" =~ ^refs/heads/working/.* ]]; then
+          git checkout ${branch##*/} &> /dev/null
+          git format-patch master --stdout > \
+          {{ _prefix }}_${branch##*/}.patch
+        fi
+      done
+    args:
+      chdir: "{{ _repo.args.track }}"
+    vars:
+      _prefix: "{{ box_local_patch_path }}/{{ _repo.repository }}"
+    loop_control:
+      label: "{{ _repo.args.track }}"
+      loop_var: _repo
+    register: _patches
+    loop: "{{ repositories
+              | selectattr('args.track', 'defined')
+           }}"

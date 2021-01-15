@@ -1,0 +1,6 @@
+---
+# devbox :: patch
+
+  - import_tasks: "{{ box_task_library }}/track-repositories.yml"
+    vars:
+      repositories: "{{ devbox.repositories }}"
