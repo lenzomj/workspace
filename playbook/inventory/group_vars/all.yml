@@ -73,6 +73,7 @@ box_fetch_allowlists:
   dev:      [ 'get', 'git', 'pip' ]
   get_git:  [ 'get', 'git' ]
   git:      [ 'git' ]
+  get:      [ 'get' ]
 
 # What is the default fetch allowlist?
 box_fetch_allowlist: "{{ box_fetch_allowlists.all }}"

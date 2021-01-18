@@ -1,17 +1,19 @@
 ---
 # library :: fetch-resources
 
-  - name: Creating cache directories as required
+  - name: "Creating cache directories as required"
+    no_log: true
     when:
       - ( box_has_internet or box_has_mirror )
       - ( 'get' in box_fetch_allowlist )
     file:
-      path: "{{ _cache_path | dirname }}"
+      path: "{{ _full_path | dirname }}"
       state: directory
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _full_path: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop_control:
       loop_var: _rcs
     loop: "{{ resources }}"
@@ -31,9 +33,27 @@
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop_control:
       loop_var: _rcs
-    loop: "{{ resources }}"
+    loop: "{{ resources | selectattr('args.password', 'undefined') }}"
 
-    #TODO: Fetching password-protected resources from upstream
+  - name: "Fetching password-protected resources from upstream"
+    no_log: true
+    when:
+      - ( box_has_internet )
+      - ( 'get' in box_fetch_allowlist )
+    get_url:
+      url: "{{ _rcs.upstream }}"
+      url_username: "{{ _rcs.args.username }}"
+      url_password: "{{ _rcs.args.password }}"
+      dest: "{{ _dest }}"
+      checksum: "{{ _rcs.checksum }}"
+    vars:
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
+    loop_control:
+      loop_var: _rcs
+    loop: "{{ resources | selectattr('args.password', 'defined') }}"
 
   - name: "Fetching resources from mirror"
     when:

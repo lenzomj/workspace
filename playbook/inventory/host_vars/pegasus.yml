@@ -8,6 +8,7 @@
 # Override
 box_airgap_mount_paths:
   - /media/{{ lookup('env', 'USER') }}/Fortress
+  - /mnt/Fortress
 
 pegasus:
   vault_vars:
