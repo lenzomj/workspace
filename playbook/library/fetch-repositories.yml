@@ -4,6 +4,7 @@
   - name: "Fetching public repositories from upstream"
     when:
       - ( box_has_internet )
+      - ( box_has_git )
       - ( 'git' in box_fetch_allowlist )
     git:
       repo: "{{ item.upstream }}"
@@ -24,6 +25,7 @@
     no_log: true
     when:
       - ( box_has_internet )
+      - ( box_has_git )
       - ( 'git' in box_fetch_allowlist )
     git:
       repo: "{{ _repo }}"
@@ -43,6 +45,7 @@
   - name: "Fetching repositories from mirror"
     when:
       - ( box_has_mirror and not box_has_internet )
+      - ( box_has_git)
       - ( 'git' in box_fetch_allowlist )
       - ( _repo != _dest )
     git:

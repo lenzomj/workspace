@@ -10,7 +10,7 @@
       private: no
     - name: _push_to_airgap
       prompt: Push patches to airgap drive?
-      default: no
+      default: false
       private: no
   tasks:
     - name: Searching for patch tasks across roles
@@ -46,6 +46,8 @@
         state: directory
 
     - name: "Pushing {{ box_local_patch_path }} to airgap drive"
-      when: ( _push_to_airgap and box_has_airgap_mount )
+      when:
+        - box_has_airgap_mount
+        - ( _push_to_airgap | bool )
       command: |
         cp -r {{ box_local_patch_path }} {{ box_airgap_mount_path }}/working/

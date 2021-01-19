@@ -1,6 +1,8 @@
 ---
 # common :: tasks
 
+  - include: prefetch.yml
+
   - name: "Creating {{ box_local_path }} directory structure"
     file:
       path: "{{ item }}"

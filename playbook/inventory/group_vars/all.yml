@@ -21,7 +21,7 @@ box_local_config_path: "{{ box_local_path }}/configuration.yml"
 box_local_cache_path: "{{ box_local_path }}/cache"
 
 # Path to downstream git patches
-box_local_patch_path: "{{ box_local_cache_path }}/patches"
+box_local_patch_path: "{{ box_local_path }}/patches"
 
 # Path to local inventory
 box_local_inventory_path: "{{ box_local_path }}/inventory"

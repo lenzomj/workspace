@@ -4,6 +4,7 @@
   - name: Creating cache directories as required
     when:
       - ( box_has_internet )
+      - ( box_has_rsync )
       - ( 'rsync' in box_fetch_allowlist )
     file:
       path: "{{ _cache_path | dirname }}"
@@ -17,6 +18,7 @@
   - name: Fetching mirrors from upstream
     when:
       - ( box_has_internet )
+      - ( box_has_rsync )
       - ( 'rsync' in box_fetch_allowlist )
     command: "rsync -avSHP --no-motd --delete {{ _opts }} {{ item.upstream }} {{ _local }}"
     vars:

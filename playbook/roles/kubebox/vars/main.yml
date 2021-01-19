@@ -6,4 +6,4 @@ kubebox:
     - resource: kubic-repo-key
       upstream: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
       checksum: sha256:4e15d48e67d6d2b454bcd2749434887b4c736497336153854c9398ec1a06e60a
-      handlers: download
+      handlers: get

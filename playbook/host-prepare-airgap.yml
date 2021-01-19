@@ -10,7 +10,7 @@
       private: no
     - name: _push_to_airgap
       prompt: Push payload to airgap drive?
-      default: no
+      default: false
       private: no
   tasks:
     - name: Searching for fetchable tasks across roles
@@ -65,7 +65,9 @@
         loop_var: _role_path
 
     - name: "Pushing {{ box_local_cache_path }} to {{ box_gapmirror_uri }}"
-      when: ( _push_to_airgap and box_has_gapmirror)
+      when:
+        - box_has_gapmirror
+        - ( _push_to_airgap | bool )
       command: "rsync {{ _baseopts}} {{ _excludes }} {{ _source }} {{ _dest }}"
       vars:
         _baseopts: "-avSHP --delete"

@@ -23,6 +23,7 @@
       {{ box_has_internet | ternary('pypi.org', box_mirror_uri) }}
     when:
       - ( box_has_internet or box_has_mirror )
+      - ( box_has_pip )
       - ( 'pip' in box_fetch_allowlist )
     command: "{{ _python }} -m pip download {{ _opts }} -r {{ _reqs.stat.path }}"
     args:

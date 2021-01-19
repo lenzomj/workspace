@@ -1,0 +1,33 @@
+---
+# common :: prefetch
+
+  - name: Checking for git
+    command: "git --version"
+    register: _git_version
+    changed_when: false
+    failed_when: false
+
+  - name: Checking for rsync
+    command: "rsync --version"
+    register: _rsync_version
+    changed_when: false
+    failed_when: false
+
+  - name: Checking for pip
+    command: "{{ ansible_python_interpreter }} -m pip --version"
+    register: _pip_version
+    changed_when: false
+    failed_when: false
+
+  - name: Checking for skopeo
+    command: "skopeo --version"
+    register: _skopeo_version
+    changed_when: false
+    failed_when: false
+
+  - name: Consolidating facts
+    set_fact:
+      box_has_git: "{{ _git_version.rc == 0 | bool }}"
+      box_has_rsync: "{{ _rsync_version.rc == 0 | bool }}"
+      box_has_pip: "{{ _pip_version.rc == 0 | bool }}"
+      box_has_skopeo: "{{ _skopeo_version.rc == 0 | bool }}"
