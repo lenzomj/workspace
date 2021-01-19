@@ -2,6 +2,11 @@
 # devbox :: vars
 
 devbox:
+  resources:
+    - resource: cascadia-font
+      upstream: "https://github.com/microsoft/cascadia-code/releases/download/v2009.22/CascadiaCode-2009.22.zip"
+      checksum: sha256:801bcc94b79ae46bc573c9c07feb44d581e12d15f79b176be165f00f8fdf9846
+
   repositories:
     - repository: dotfiles
       upstream: https://github.com/lenzomj/dotfiles.git

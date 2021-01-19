@@ -16,9 +16,9 @@
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
-    loop: "{{ repositories | selectattr('args.password', 'undefined') }}"
     loop_control:
       label: "{{ _dest }}"
+    loop: "{{ repositories | selectattr('args.password', 'undefined') }}"
 
   - name: "Fetching password-protected repositories from upstream"
     no_log: true
@@ -58,6 +58,6 @@
       _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
       _repo: "{{ _mirror_path }}/{{ _host }}{{ _path }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
-    loop: "{{ repositories }}"
     loop_control:
       label: "{{ _dest }}"
+    loop: "{{ repositories }}"

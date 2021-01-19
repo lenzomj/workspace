@@ -1,6 +1,10 @@
 ---
 # devbox :: fetch
 
+  - import_tasks: "{{ box_task_library }}/fetch-resources.yml"
+    vars:
+      resources: "{{ devbox.resources }}"
+
   - import_tasks: "{{ box_task_library }}/fetch-repositories.yml"
     vars:
       repositories: "{{ devbox.repositories }}"

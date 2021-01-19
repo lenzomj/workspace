@@ -59,16 +59,19 @@
     when:
       - ( box_has_mirror and not box_has_internet )
       - ( 'get' in box_fetch_allowlist )
+      - ( _url != _dest )
     get_url:
-      url: "{{ _mirror_path }}"
+      url: "file://{{ _url }}"
       dest: "{{ _dest }}"
       checksum: "{{ _rcs.checksum }}"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') }}"
-      _mirror_path: "file://{{ box_mirror_uri }}/{{ _host }}{{ _path }}"
+      _mirror_path: "{{ item.args.mirror | default(box_mirror_uri) }}"
       _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _url: "{{ _mirror_path }}/{{ _host }}{{ _path }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop_control:
       loop_var: _rcs
+      label: "{{ _dest }}"
     loop: "{{ resources }}"
