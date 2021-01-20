@@ -13,13 +13,11 @@ kubebox:
 
     - resource: minikube-deb
       upstream: "https://storage.googleapis.com/minikube/releases/v1.16.0/minikube_1.16.0-1_amd64.deb"
-#     upstream: "https://github.com/kubernetes/minikube/releases/download/v1.16.0/minikube_1.16.0-1_amd64.deb"
       checksum: sha256:78a62f938932e1d6cafb5120f519505bc229a1cdcb5767e048fc4b729aebb6f6
       handlers: get and install on Debian
 
     - resource: minikube-rhel
       upstream: "https://storage.googleapis.com/minikube/releases/v1.16.0/minikube-1.16.0-0.x86_64.rpm"
-#     upstream: "https://github.com/kubernetes/minikube/releases/download/v1.16.0/minikube-1.16.0-0.x86_64.rpm"
       checksum: sha256:7c44daa4e46007ea06dd03085fc39e7e62e08d23f9eca9da35a5a9b9bdfbbb74
       handlers: get and install on RedHat
 
@@ -44,3 +42,11 @@ kubebox:
       handlers: get and copy on Debian or RedHat
       args:
         dest: "{{ kubebox_minikube_cache }}/preloaded-tarball/"
+
+    - resource: docker-centos:centos7
+      upstream: "docker://docker.io/centos:centos7"
+      handlers: skopeo-copy
+
+    - resource: docker-hello-world:latest
+      upstream: "docker://docker.io/hello-world:latest"
+      handlers: skopeo-copy

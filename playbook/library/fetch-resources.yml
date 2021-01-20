@@ -84,23 +84,56 @@
               | selectattr('handlers', 'search', 'get')
            }}"
 
+  - name: "Fetching public docker resources from upstream"
+    when:
+      - ( box_has_internet )
+      - ( box_has_skopeo )
+      - ( 'get' in box_fetch_allowlist )
+    shell: |
+      if [[ ! -f {{ _dest }} ]]; then
+        skopeo copy {{ _src }} docker-archive:{{ _dest }}
+      else
+        touch {{ _dest }}
+      fi
+    vars:
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') | dirname }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _src: "{{ _rcs.upstream }}"
+      _filename: "{{ _rcs.upstream |  replace(':','_') | basename }}.tar"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}{{ _filename }}"
+    loop_control:
+      loop_var: _rcs
+      label: "{{ _dest }}"
+    loop: "{{ resources
+              | selectattr('handlers', 'search', 'skopeo-copy')
+              | selectattr('args.password', 'undefined')
+           }}"
+
   - name: "Fetching password-protected docker resources from upstream"
     no_log: true
     when:
       - ( box_has_internet )
       - ( box_has_skopeo )
       - ( 'get' in box_fetch_allowlist )
-    command: "skopeo copy --src-creds '{{ _creds }}' {{ _src }} {{ _dest }}"
+    shell: |
+      if [[ ! -f "{{ _dest }}" ]]; then
+        skopeo copy --src-creds '{{ _creds }}' {{ _src }} docker-archive:{{ _dest }}
+      else
+        touch {{ _dest }}
+      fi
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
-      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') | dirname }}"
       _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
       _creds: "{{ _rcs.args.username }}:{{ _rcs.args.password }}"
       _src: "{{ _rcs.upstream }}"
-      _dest: "dir://{{ _cache_path }}/{{ _host }}{{ _path }}"
+      _filename: "{{ _rcs.upstream |  replace(':','_') | basename }}.tar"
+      _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}{{ _filename }}"
     loop_control:
       loop_var: _rcs
       label: "{{ _dest }}"
     loop: "{{ resources
               | selectattr('handlers', 'search', 'skopeo-copy')
+              | selectattr('args.password', 'defined')
            }}"
