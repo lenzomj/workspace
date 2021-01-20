@@ -1,9 +1,46 @@
 ---
 # kubebox :: vars
 
+kubebox_minikube_home: "{{ ansible_env.MINIKUBE_HOME | default(ansible_env.HOME + '/.minikube') }}"
+kubebox_minikube_cache: "{{ kubebox_minikube_home }}/cache"
+
 kubebox:
   resources:
     - resource: kubic-repo-key
       upstream: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
       checksum: sha256:4e15d48e67d6d2b454bcd2749434887b4c736497336153854c9398ec1a06e60a
       handlers: get
+
+    - resource: minikube-deb
+      upstream: "https://storage.googleapis.com/minikube/releases/v1.16.0/minikube_1.16.0-1_amd64.deb"
+#     upstream: "https://github.com/kubernetes/minikube/releases/download/v1.16.0/minikube_1.16.0-1_amd64.deb"
+      checksum: sha256:78a62f938932e1d6cafb5120f519505bc229a1cdcb5767e048fc4b729aebb6f6
+      handlers: get and install on Debian
+
+    - resource: minikube-rhel
+      upstream: "https://storage.googleapis.com/minikube/releases/v1.16.0/minikube-1.16.0-0.x86_64.rpm"
+#     upstream: "https://github.com/kubernetes/minikube/releases/download/v1.16.0/minikube-1.16.0-0.x86_64.rpm"
+      checksum: sha256:7c44daa4e46007ea06dd03085fc39e7e62e08d23f9eca9da35a5a9b9bdfbbb74
+      handlers: get and install on RedHat
+
+    - resource: minikube-iso
+      upstream: "https://storage.googleapis.com/minikube/iso/minikube-v1.16.0.iso"
+      checksum: sha256:acbd805831ad3afe8935c6e28888a414e9cde952afe5b574b9f44c853bde8814
+      handlers: get and copy on Debian or RedHat
+      args:
+        dest: "{{ kubebox_minikube_cache }}/iso/"
+
+    - resource: kubectl
+      upstream: "https://storage.googleapis.com/kubernetes-release/release/v1.20.0/bin/linux/amd64/kubectl"
+      checksum: sha256:a5895007f331f08d2e082eb12458764949559f30bcc5beae26c38f3e2724262c
+      handlers: get and copy on Debian or RedHat
+      args:
+        dest: "{{ ansible_env.HOME }}/.local/bin"
+        mode: "a+x"
+
+    - resource: preloaded-images-k8s-docker
+      upstream: "https://storage.googleapis.com/minikube-preloaded-volume-tarballs/preloaded-images-k8s-v8-v1.20.0-docker-overlay2-amd64.tar.lz4"
+      checksum: sha256:6bc9dddb8eb580c08933d4b12ff68901635845f83420d75e0f2fd4bab6c5ea25
+      handlers: get and copy on Debian or RedHat
+      args:
+        dest: "{{ kubebox_minikube_cache }}/preloaded-tarball/"

@@ -16,7 +16,6 @@
     loop_control:
       loop_var: _rcs
     loop: "{{ resources
-              | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*Debian')
            }}"
 
@@ -36,7 +35,6 @@
     loop_control:
       loop_var: _rcs
     loop: "{{ resources
-              | selectattr('handlers', 'defined')
               | selectattr('handlers', 'search', 'install.*RedHat')
            }}"
 
@@ -45,7 +43,7 @@
       - (_rcs.requires | default(true, true))
     unarchive:
       src: "{{ _cache_path }}"
-      dest: "{{ _rcs.argument }}"
+      dest: "{{ _rcs.args.dest }}"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') }}"
@@ -54,6 +52,23 @@
     loop_control:
       loop_var: _rcs
     loop: "{{ resources
-              | selectattr('handlers', 'defined')
+              | selectattr('handlers', 'search', _handler)
+           }}"
+
+  - name: Copying resources
+    when:
+      - (_rcs.requires | default(true, true))
+    copy:
+      src: "{{ _cache_path }}"
+      dest: "{{ _rcs.args.dest }}"
+      mode: "{{ _rcs.args.mode | default('preserve') }}"
+    vars:
+      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
+      _path: "{{ _rcs.upstream | urlsplit('path') }}"
+      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+      _handler: "copy.*{{ ansible_os_family }}"
+    loop_control:
+      loop_var: _rcs
+    loop: "{{ resources
               | selectattr('handlers', 'search', _handler)
            }}"
