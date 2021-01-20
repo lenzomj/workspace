@@ -10,6 +10,7 @@
     with_items:
       - "{{ box_local_cache_path }}"
       - "{{ box_local_patch_path }}"
+      - "{{ box_local_docs_path }}"
       - "{{ box_local_inventory_path }}"
       - "{{ box_local_roles_path }}"
       - "{{ box_local_path }}/vault"
