@@ -18,6 +18,7 @@
       done
     args:
       chdir: "{{ _repo.args.track }}"
+      executable: "/bin/bash"
     vars:
       _prefix: "{{ box_local_patch_path }}/{{ _repo.repository }}"
     loop_control:
