@@ -89,7 +89,12 @@
       - ( box_has_internet )
       - ( box_has_skopeo )
       - ( 'get' in box_fetch_allowlist )
-    shell: "[[ -f {{ _dest }} ]] || skopeo copy {{ _src }} docker-archive:{{ _dest }}"
+    shell: |
+      if [[ ! -f "{{ _dest }}" ]]; then
+        skopeo copy {{ _src }} docker-archive:{{ _dest }}
+      fi
+    args:
+      executable: "/bin/bash"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') | dirname }}"
@@ -111,7 +116,12 @@
       - ( box_has_internet )
       - ( box_has_skopeo )
       - ( 'get' in box_fetch_allowlist )
-    shell: "[[ -f {{ _dest }} ]] || skopeo copy --src-creds '{{ _creds }}' {{ _src }} docker-archive:{{ _dest }}"
+    shell: |
+      if [[ ! -f "{{ _dest }}" ]]; then
+        skopeo copy --src-creds '{{ _creds }}' {{ _src }} docker-archive:{{ _dest }}
+      fi
+    args:
+      executable: "/bin/bash"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') | dirname }}"
