@@ -1,0 +1,13 @@
+---
+# kubebox-centos :: tasks
+
+  - name: Installing docker and friends
+    become: true
+    vars:
+      ansible_python_interpreter: "/usr/bin/env python"
+    package:
+      name:
+        - skopeo
+        - docker
+      state: present
+
