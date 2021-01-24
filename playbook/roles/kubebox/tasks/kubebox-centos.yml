@@ -1,7 +1,7 @@
 ---
 # kubebox-centos :: tasks
 
-  - name: Installing docker and friends
+  - name: (CentOS) Installing docker and friends
     become: true
     vars:
       ansible_python_interpreter: "/usr/bin/env python"
@@ -11,3 +11,8 @@
         - docker
       state: present
 
+  - name: Creating docker group
+    become: true
+    group:
+      name: docker
+      state: present

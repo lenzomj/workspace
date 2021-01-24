@@ -26,7 +26,7 @@
       repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
       state: present
 
-  - name: (Debian) Installing packages
+  - name: (Debian) Installing docker and friends
     become: true
     package:
       name: "{{ item }}"
@@ -34,5 +34,9 @@
     with_items:
       - skopeo
       - docker-ce
-      - docker-ce-cli
-      - containerd.io
+
+  - name: Creating docker group
+    become: true
+    group:
+      name: docker
+      state: present

@@ -12,6 +12,12 @@
   - include: "kubebox-centos.yml"
     when: (ansible_distribution == "CentOS")
 
+  - name: Creating docker group
+    become: true
+    group:
+      name: docker
+      state: present
+
   - import_tasks: "{{ box_task_library }}/install-resources.yml"
     vars:
       resources: "{{ kubebox.resources }}"
