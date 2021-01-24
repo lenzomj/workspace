@@ -46,8 +46,20 @@ kubebox:
         dest: "{{ ansible_env.HOME }}/.local/bin/docker-compose"
         mode: "a+x"
 
+    - resource: postgres:latest
+      upstream: "docker://docker.io/postgres:latest"
+      handlers: skopeo-copy
+
+    - resource: nginx:stable
+      upstream: "docker://docker.io/nginx:stable"
+      handlers: skopeo-copy
+
     - resource: centos:centos7
       upstream: "docker://docker.io/centos:centos7"
+      handlers: skopeo-copy
+
+    - resource: jenkins:lts
+      upstream: "docker://docker.io/jenkins/jenkins:lts"
       handlers: skopeo-copy
 
     - resource: hello-world:latest
