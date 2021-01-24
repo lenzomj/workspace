@@ -6,11 +6,6 @@ kubebox_minikube_cache: "{{ kubebox_minikube_home }}/cache"
 
 kubebox:
   resources:
-    - resource: kubic-repo-key
-      upstream: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
-      checksum: sha256:4e15d48e67d6d2b454bcd2749434887b4c736497336153854c9398ec1a06e60a
-      handlers: get
-
     - resource: minikube-deb
       upstream: "https://storage.googleapis.com/minikube/releases/v1.16.0/minikube_1.16.0-1_amd64.deb"
       checksum: sha256:78a62f938932e1d6cafb5120f519505bc229a1cdcb5767e048fc4b729aebb6f6
@@ -28,6 +23,13 @@ kubebox:
       args:
         dest: "{{ kubebox_minikube_cache }}/iso/"
 
+    - resource: minikube-preloaded-images-k8s-docker
+      upstream: "https://storage.googleapis.com/minikube-preloaded-volume-tarballs/preloaded-images-k8s-v8-v1.20.0-docker-overlay2-amd64.tar.lz4"
+      checksum: sha256:6bc9dddb8eb580c08933d4b12ff68901635845f83420d75e0f2fd4bab6c5ea25
+      handlers: get and copy on Debian or RedHat
+      args:
+        dest: "{{ kubebox_minikube_cache }}/preloaded-tarball/"
+
     - resource: kubectl
       upstream: "https://storage.googleapis.com/kubernetes-release/release/v1.20.0/bin/linux/amd64/kubectl"
       checksum: sha256:a5895007f331f08d2e082eb12458764949559f30bcc5beae26c38f3e2724262c
@@ -36,17 +38,18 @@ kubebox:
         dest: "{{ ansible_env.HOME }}/.local/bin"
         mode: "a+x"
 
-    - resource: preloaded-images-k8s-docker
-      upstream: "https://storage.googleapis.com/minikube-preloaded-volume-tarballs/preloaded-images-k8s-v8-v1.20.0-docker-overlay2-amd64.tar.lz4"
-      checksum: sha256:6bc9dddb8eb580c08933d4b12ff68901635845f83420d75e0f2fd4bab6c5ea25
+    - resource: docker-compose
+      upstream: "https://github.com/docker/compose/releases/download/1.28.0/docker-compose-linux-x86_64"
+      checksum: sha256:07a5e4104ac6495603454ada9c053a79ac554f65df3ffc28e833b571f6c3e6d1
       handlers: get and copy on Debian or RedHat
       args:
-        dest: "{{ kubebox_minikube_cache }}/preloaded-tarball/"
+        dest: "{{ ansible_env.HOME }}/.local/bin/docker-compose"
+        mode: "a+x"
 
-    - resource: docker-centos:centos7
+    - resource: centos:centos7
       upstream: "docker://docker.io/centos:centos7"
       handlers: skopeo-copy
 
-    - resource: docker-hello-world:latest
+    - resource: hello-world:latest
       upstream: "docker://docker.io/hello-world:latest"
       handlers: skopeo-copy

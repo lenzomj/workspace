@@ -91,7 +91,8 @@
       - ( 'get' in box_fetch_allowlist )
     shell: |
       if [[ ! -f "{{ _dest }}" ]]; then
-        skopeo copy {{ _src }} docker-archive:{{ _dest }}
+        skopeo copy {{ _src }} \
+        docker-archive:{{ _dest }}:{{ _rcs.resource }}
       fi
     args:
       executable: "/bin/bash"
@@ -118,7 +119,8 @@
       - ( 'get' in box_fetch_allowlist )
     shell: |
       if [[ ! -f "{{ _dest }}" ]]; then
-        skopeo copy --src-creds '{{ _creds }}' {{ _src }} docker-archive:{{ _dest }}
+        skopeo copy --src-creds '{{ _creds }}' {{ _src }} \
+        docker-archive:{{ _dest }}:{{ _rcs.resource }}
       fi
     args:
       executable: "/bin/bash"

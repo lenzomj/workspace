@@ -1,24 +1,38 @@
 ---
 # kubebox-debian :: tasks
 
-  - name: Add kubic repository on Debian
-    become: true
-    lineinfile:
-      path: /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-      line: "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/ /"
-      create: yes
-
-  - name: Add kubic repository key on Debian
+  - name: (Debian) Adding kubic repository key
     become: true
     apt_key:
-      file: "{{ _keyfile_path }}"
+      url: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/Release.key"
       state: present
-    vars:
-      _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
-      _path: "{{ _rcs.upstream | urlsplit('path') }}"
-      _keyfile_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
-    loop_control:
-      loop_var: _rcs
-    loop: "{{ kubebox.resources
-              | selectattr('resource', 'search', 'repo-key')
-           }}"
+
+  - name: (Debian) Adding kubic repository to sources list
+    become: true
+    apt_repository:
+      repo: "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_18.04/ /"
+      state: present
+
+  - name: (Debian) Adding docker repository key
+    become: true
+    apt_key:
+      id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+      url: "https://download.docker.com/linux/ubuntu/gpg"
+      state: present
+
+  - name: (Debian) Adding docker repository to sources list
+    become: true
+    apt_repository:
+      repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+      state: present
+
+  - name: (Debian) Installing packages
+    become: true
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - skopeo
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
