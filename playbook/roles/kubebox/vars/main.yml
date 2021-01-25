@@ -41,7 +41,16 @@ kubebox:
     - resource: docker-compose
       upstream: "https://github.com/docker/compose/releases/download/1.28.0/docker-compose-linux-x86_64"
       checksum: sha256:07a5e4104ac6495603454ada9c053a79ac554f65df3ffc28e833b571f6c3e6d1
-      handlers: get and copy on Debian or RedHat
+      handlers: get and copy on Debian
+      args:
+        dest: "{{ ansible_env.HOME }}/.local/bin/docker-compose"
+        mode: "a+x"
+
+      # TODO: migrate CentOS to docker-compose 1.28.0 after 1.28.x compatibility patch
+    - resource: docker-compose
+      upstream: "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-linux-x86_64"
+      checksum:
+      handlers: get and copy on RedHat
       args:
         dest: "{{ ansible_env.HOME }}/.local/bin/docker-compose"
         mode: "a+x"
