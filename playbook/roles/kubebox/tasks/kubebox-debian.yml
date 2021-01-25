@@ -34,8 +34,10 @@
     with_items:
       - skopeo
       - docker-ce
+      - podman
+      - buildah
 
-  - name: Creating docker group
+  - name: (Debian) Creating docker group
     become: true
     group:
       name: docker

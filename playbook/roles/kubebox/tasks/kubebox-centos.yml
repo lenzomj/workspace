@@ -9,9 +9,11 @@
       name:
         - skopeo
         - docker
+        - podman
+        - buildah
       state: present
 
-  - name: Creating docker group
+  - name: (CentOS) Creating docker group
     become: true
     group:
       name: docker
