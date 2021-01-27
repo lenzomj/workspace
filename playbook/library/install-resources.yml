@@ -42,12 +42,13 @@
     when:
       - (_rcs.requires | default(true, true))
     unarchive:
-      src: "{{ _cache_path }}"
+      src: "{{ _src }}"
       dest: "{{ _rcs.args.dest }}"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _src: "{{ _cache_path }}/{{ _host }}{{ _path }}"
       _handler: "extract.*{{ ansible_os_family }}"
     loop_control:
       loop_var: _rcs
@@ -59,13 +60,14 @@
     when:
       - (_rcs.requires | default(true, true))
     copy:
-      src: "{{ _cache_path }}"
+      src: "{{ _src }}"
       dest: "{{ _rcs.args.dest }}"
       mode: "{{ _rcs.args.mode | default('preserve') }}"
     vars:
       _host: "{{ _rcs.upstream | urlsplit('hostname') }}"
       _path: "{{ _rcs.upstream | urlsplit('path') }}"
-      _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
+      _cache_path: "{{ _rcs.args.cache | default(box_local_cache_path) }}"
+      _src: "{{ _cache_path }}/{{ _host }}{{ _path }}"
       _handler: "copy.*{{ ansible_os_family }}"
     loop_control:
       loop_var: _rcs
