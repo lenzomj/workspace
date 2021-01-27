@@ -1,79 +1,131 @@
 ---
 # lonelybox :: tasks
 
-    - name: Adding CentOS-7 mirror repositories to /etc/yum.repos.d/
-      become: true
-      blockinfile:
-        path: /etc/yum.repos.d/CentOS-Mirror.repo
-        create: yes
-        owner: root
-        group: root
-        mode: '0644'
-        block: |
-          [mirror-base]
-          name=CentOS-$releasever - Base Mirror
-          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-          gpgcheck=1
-          enabled=1
+  - name: Creating CentOS-7 mirror list directory
+    become: true
+    file:
+      path: "{{ lonelybox.paths.mirrorlists }}"
+      state: directory
 
-          [mirror-updates]
-          name=CentOS-$releasever - Updates Mirror
-          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-          gpgcheck=1
-          enabled=1
+  - name: Creating CentOS-7 base mirror list
+    become: true
+    copy:
+      dest: "{{ lonelybox.paths.mirrorlists }}/mirror-base.list"
+      content: |
+        file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
+        {{ box_netmirror_uri }}/mirror.centos.org/centos/$releasever/os/$basearch/
 
-          [mirror-extras]
-          name=CentOS-$releasever - Extras Mirror
-          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
-          gpgcheck=1
-          enabled=1
+  - name: Adding CentOS-7 base repository
+    become: true
+    yum_repository:
+      name: mirror-base
+      description: CentOS-7 - Local Base
+      file: lonelybox_mirrors
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-base.list"
+      gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      gpgcheck: true
 
-          [mirror-centos-sclo-rh]
-          name=CentOS-7 - SCLo rh Mirror
-          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-SCLo
-          gpgcheck=1
-          enabled=1
+  - name: Creating CentOS-7 updates mirror list
+    become: true
+    copy:
+      dest: "{{ lonelybox.paths.mirrorlists }}/mirror-updates.list"
+      content: |
+        file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
+        {{ box_netmirror_uri }}/mirror.centos.org/centos/$releasever/updates/$basearch/
 
-          [mirror-epel]
-          name=EPEL-$releasever - $basearch Mirror
-          baseurl=file://{{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
-          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
-          gpgcheck=1
-          enabled=1
+  - name: Adding CentOS-7 updates repository
+    become: true
+    yum_repository:
+      name: mirror-updates
+      description: CentOS-7 - Local Updates
+      file: lonelybox_mirrors
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-updates.list"
+      gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      gpgcheck: true
 
-    - name: Adding extra CentOS-7 mirror repository keys
-      become: true
-      vars:
-        ansible_python_interpreter: "/usr/bin/env python"
-      package:
-        name:
-          - centos-release-scl
-          - epel-release
-        state: present
+  - name: Creating CentOS-7 extras mirror list
+    become: true
+    copy:
+      dest: "{{ lonelybox.paths.mirrorlists }}/mirror-extras.list"
+      content: |
+        file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
+        {{ box_netmirror_uri }}/mirror.centos.org/centos/$releasever/extras/$basearch/
 
-    - name: Verifying base packages
-      become: true
-      vars:
-        ansible_python_interpreter: "/usr/bin/env python"
-      package:
-        name:
-          - "@Development tools"
-          - python
-          - python3
-          - libselinux-python3
-          - git
-          - rsync
-          - curl
-        state: present
+  - name: Adding CentOS-7 extras repository
+    become: true
+    yum_repository:
+      name: mirror-extras
+      description: CentOS-7 - Local Extras
+      file: lonelybox_mirrors
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-extras.list"
+      gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      gpgcheck: true
 
-    - name: Updating installed packages to latest
-      become: true
-      vars:
-        ansible_python_interpreter: "/usr/bin/env python"
-      package:
-        name: '*'
-        state: latest
+  - name: Creating CentOS-7 SCLo mirror list
+    become: true
+    copy:
+      dest: "{{ lonelybox.paths.mirrorlists }}/mirror-sclo-rh.list"
+      content: |
+        file://{{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
+        {{ box_gapmirror_uri }}/mirror.centos.org/centos/$releasever/sclo/$basearch/rh/
+
+  - name: Adding CentOS-7 SCLo repository
+    become: true
+    yum_repository:
+      name: mirror-centos-sclo-rh
+      description: CentOS-7 - Local SCLo
+      file: lonelybox_mirrors
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-sclo-rh.list"
+      gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-SIG-SCLo
+      gpgcheck: true
+
+  - name: Creating EPEL-7 mirror list
+    become: true
+    copy:
+      dest: "{{ lonelybox.paths.mirrorlists }}/mirror-epel.list"
+      content: |
+        file://{{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
+        {{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
+
+  - name: Adding EPEL-7 SCLo repository
+    become: true
+    yum_repository:
+      name: mirror-centos-sclo-rh
+      description: CentOS-7 - Local SCLo
+      file: lonelybox_mirrors
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-sclo-rh.list"
+      gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+      gpgcheck: true
+
+  - name: Adding extra CentOS-7 repository keys
+    become: true
+    vars:
+      ansible_python_interpreter: "/usr/bin/env python"
+    package:
+      name:
+        - centos-release-scl
+        - epel-release
+      state: present
+
+  - name: Verifying base packages
+    become: true
+    vars:
+      ansible_python_interpreter: "/usr/bin/env python"
+    package:
+      name:
+        - "@Development tools"
+        - python
+        - python3
+        - libselinux-python3
+        - git
+        - rsync
+        - curl
+      state: present
+
+  - name: Updating installed packages to latest
+    become: true
+    vars:
+      ansible_python_interpreter: "/usr/bin/env python"
+    package:
+      name: '*'
+      state: latest
