@@ -55,6 +55,10 @@ kubebox:
         dest: "{{ ansible_env.HOME }}/.local/bin/docker-compose"
         mode: "a+x"
 
+    - resource: gcr.io/k8s-minikube/kicbase:v0.0.17
+      upstream: "docker://gcr.io/k8s-minikube/kicbase:v0.0.17"
+      handlers: skopeo-copy
+
     - resource: postgres:latest
       upstream: "docker://docker.io/postgres:latest"
       handlers: skopeo-copy
