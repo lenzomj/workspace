@@ -18,3 +18,17 @@
     group:
       name: docker
       state: present
+
+    # firewall-cmd \
+    #   --permanent \
+    #   --add-rich-rule="rule family='ipv4' source address='192.168.99.0/24' accept"
+    # firewall-cmd --list-rich-rules
+  - name: (CentOS) Configuring firewall settings
+    become: true
+    vars:
+      ansible_python_interpreter: "/usr/bin/env python"
+    ansible.posix.firewalld:
+      rich_rule: "rule family='ipv4' source address='192.168.99.0/24' accept"
+      permanent: true
+      immediate: true
+      state: disabled

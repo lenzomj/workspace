@@ -87,13 +87,13 @@
         file://{{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
         {{ box_gapmirror_uri }}/mirror.centos.org/fedora-epel/$releasever/$basearch/
 
-  - name: Adding EPEL-7 SCLo repository
+  - name: Adding EPEL-7 repository
     become: true
     yum_repository:
-      name: mirror-centos-sclo-rh
-      description: CentOS-7 - Local SCLo
+      name: mirror-epel
+      description: EPEL-7 - Local EPEL
       file: lonelybox_mirrors
-      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-sclo-rh.list"
+      mirrorlist: "file://{{ lonelybox.paths.mirrorlists }}/mirror-epel.list"
       gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
       gpgcheck: true
 
@@ -120,6 +120,7 @@
         - git
         - rsync
         - curl
+        - tree
       state: present
 
   - name: Updating installed packages to latest
