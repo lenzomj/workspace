@@ -70,7 +70,7 @@
         - ( _push_to_airgap | bool )
       command: "rsync {{ _baseopts}} {{ _excludes }} {{ _source }} {{ _dest }}"
       vars:
-        _baseopts: "-avSHP --delete"
+        _baseopts: "-aSHW --delete --no-perms"
         _excludes: "{{ ['--exclude ']
                        | product(box_sync_excludelist)
                        | map('join')
