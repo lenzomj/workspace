@@ -72,7 +72,7 @@ box_airgap_mount_paths: [ ]
 # Default fetch allowlists
 box_fetch_allowlists:
   none:     [ ]
-  all:      [ 'get','git', 'pip', 'rsync' ]
+  all:      [ 'get','git', 'pip', 'sync' ]
   dev:      [ 'get', 'git', 'pip' ]
   get_git:  [ 'get', 'git' ]
   git:      [ 'git' ]

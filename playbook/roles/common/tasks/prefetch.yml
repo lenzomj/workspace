@@ -13,6 +13,14 @@
     changed_when: false
     failed_when: false
 
+  - name: Checking for wget
+    command: "wget --version"
+    args:
+      warn: false # Ignore warning suggesting get_url
+    register: _wget_version
+    changed_when: false
+    failed_when: false
+
   - name: Checking for pip
     command: "{{ ansible_python_interpreter }} -m pip --version"
     register: _pip_version
@@ -29,5 +37,6 @@
     set_fact:
       box_has_git: "{{ _git_version.rc == 0 | bool }}"
       box_has_rsync: "{{ _rsync_version.rc == 0 | bool }}"
+      box_has_wget: "{{ _wget_version.rc == 0 | bool }}"
       box_has_pip: "{{ _pip_version.rc == 0 | bool }}"
       box_has_skopeo: "{{ _skopeo_version.rc == 0 | bool }}"

@@ -27,7 +27,7 @@ sandbox:
     - resource: virtualbox-bionic64
       upstream: "https://download.virtualbox.org/virtualbox/6.1.16/virtualbox-6.1_6.1.16-140961~Ubuntu~bionic_amd64.deb"
       checksum: sha256:7ab2de86dbbafb5fbbc5f9f1e4a7e6440873f490da9807aadaac996fb21bfab0
-      handlers: download and install on Debian
+      handlers: get and install on Debian
       requires: ((ansible_distribution == "Ubuntu" and
                   ansible_distribution_major_version | int == 18) or
                  (ansible_distribution == "Linux Mint" and

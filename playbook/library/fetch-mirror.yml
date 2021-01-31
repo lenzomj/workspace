@@ -1,11 +1,26 @@
 ---
 # library :: fetch-mirror
 
-  - name: Creating cache directories as required
+  - name: Fetching http mirrors from upstream
+    when:
+      - ( box_has_internet )
+      - ( box_has_wget )
+      - ( 'get' in box_fetch_allowlist )
+    command : "wget --mirror --no-parent --convert-links {{ _opts }} {{ item.upstream }}"
+    args:
+      warn: false # Ignore warning suggesting get_url
+      chdir: "{{ box_local_cache_path }}"
+    vars:
+      _opts: "{{ item.args.options | default('', true) }}"
+    loop: "{{ mirrors
+              | selectattr('handlers', 'search', 'wget')
+           }}"
+
+  - name: Creating rsync cache directories as required
     when:
       - ( box_has_internet )
       - ( box_has_rsync )
-      - ( 'rsync' in box_fetch_allowlist )
+      - ( 'sync' in box_fetch_allowlist )
     file:
       path: "{{ _cache_path | dirname }}"
       state: directory
@@ -13,17 +28,21 @@
       _host: "{{ item.mirror }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ box_local_cache_path }}/{{ _host }}{{ _path }}"
-    loop: "{{ mirrors }}"
+    loop: "{{ mirrors
+              | selectattr('handlers', 'search', 'rsync')
+           }}"
 
-  - name: Fetching mirrors from upstream
+  - name: Fetching rsync mirrors from upstream
     when:
       - ( box_has_internet )
       - ( box_has_rsync )
-      - ( 'rsync' in box_fetch_allowlist )
+      - ( 'sync' in box_fetch_allowlist )
     command: "rsync -avSHP --no-motd --delete {{ _opts }} {{ item.upstream }} {{ _local }}"
     vars:
       _host: "{{ item.mirror }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _local: "{{ box_local_cache_path }}/{{ _host }}{{ _path | dirname }}"
-      _opts: "{{ item.options | default('', true) }}"
-    loop: "{{ mirrors  }}"
+      _opts: "{{ item.args.options | default('', true) }}"
+    loop: "{{ mirrors
+              | selectattr('handlers', 'search', 'rsync')
+           }}"
