@@ -1,0 +1,23 @@
+---
+- name: Rekey vault variables
+  hosts: "{{ _target }}"
+  roles:
+    - common
+  vars_prompt:
+    - name: _target
+      prompt: Rekey variable on host
+      default: "localhost"
+      private: no
+    - name: _vault
+      prompt: Rekey variable in vault
+      default: "common"
+      private: no
+    - name: _vars
+      prompt: Rekey variables
+      default: ""
+      private: no
+  tasks:
+    - import_tasks: "{{ box_task_library }}/encrypt-vault.yml"
+      vars:
+        vault_name: "{{ _vault }}"
+        vault_vars: "{{ _vars.split(' ') }}"
