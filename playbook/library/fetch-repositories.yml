@@ -27,18 +27,17 @@
       - ( box_has_internet )
       - ( box_has_git )
       - ( 'git' in box_fetch_allowlist )
-    git:
-      repo: "{{ _repo }}"
-      dest: "{{ _dest }}"
-      bare: yes
-      clone: yes
-      update: yes
+    expect:
+      command: |
+        {{ box_task_library }}/fetch-repository.sh {{ _repo }} {{ _dest }}
+      responses:
+        Username: "{{ item.args.username }}"
+        Password: "{{ item.args.password }}"
     vars:
-      _scheme: "{{ item.upstream | urlsplit('scheme') }}"
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
       _cache_path: "{{ item.args.cache | default(box_local_cache_path) }}"
-      _repo: "{{ _scheme }}://{{ item.args.username }}:{{ item.args.password | urlencode }}@{{ _host }}{{ _path }}"
+      _repo: "{{ item.upstream }}"
       _dest: "{{ _cache_path }}/{{ _host }}{{ _path }}"
     loop: "{{ repositories | selectattr('args.password', 'defined') }}"
 
