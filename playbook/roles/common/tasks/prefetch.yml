@@ -27,6 +27,12 @@
     changed_when: false
     failed_when: false
 
+  - name: Checking for pip2pi
+    command: "pip2pi --version"
+    register: _pip2pi_version
+    changed_when: false
+    failed_when: false
+
   - name: Checking for skopeo
     command: "skopeo --version"
     register: _skopeo_version
@@ -39,4 +45,5 @@
       box_has_rsync: "{{ _rsync_version.rc == 0 | bool }}"
       box_has_wget: "{{ _wget_version.rc == 0 | bool }}"
       box_has_pip: "{{ _pip_version.rc == 0 | bool }}"
+      box_has_pip2pi: "{{ _pip2pi_version.rc == 0 | bool }}"
       box_has_skopeo: "{{ _skopeo_version.rc == 0 | bool }}"

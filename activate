@@ -47,6 +47,12 @@ if [[ "${my_os}" =~ "CentOS" ]]; then
     which ansible
   fi
 
+  if [[ ! -x "$(command -v pip2pi)" ]]; then
+    python3 -m pip install --user pip2pi
+  else
+    which pip2pi
+  fi
+
   # mkdir -p workspace && curl -L https://github.com/lenzomj/workspace/archive/python-refactor.tar.gz | tar xzf - -C ./workspace --strip-components=1
   # cd workspace && source activate
   # git init && git remote add origin git@github.com:lenzomj/workspace.git

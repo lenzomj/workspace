@@ -23,11 +23,12 @@
       {{ box_has_internet | ternary('pypi.org', box_mirror_uri) }}
     when:
       - ( box_has_internet or box_has_mirror )
-      - ( box_has_pip )
+      - ( box_has_pip2pi )
       - ( 'pip' in box_fetch_allowlist )
-    command: "{{ _python }} -m pip download {{ _opts }} -r {{ _reqs.stat.path }}"
-    args:
-      chdir: "{{ box_local_cache_path }}/pypi.org"
+    #command: "{{ _python }} -m pip download {{ _opts }} -r {{ _reqs.stat.path }}"
+    command: "pip2pi {{ box_mirror_uri }}/pypi.org/ -r {{ _reqs.stat.path }}"
+    #args:
+    #  chdir: "{{ box_local_cache_path }}/pypi.org"
     vars:
       _python: "{{ ansible_python_interpreter }}"
       _from_mirror: "--no-index --find-links={{ box_mirror_uri }}/pypi.org"
