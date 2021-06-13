@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+pushd "../../lenzomj.github.io"
+  mkdocs gh-deploy \
+    --config-file "${SCRIPT_DIR}/mkdocs.yml" \
+    --remote-branch master
+popd
