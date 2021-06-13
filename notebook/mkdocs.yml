@@ -1,2 +1,4 @@
-site_name: My Docs
-site_url: https://example.com/
+site_name: Vestigia Architecturae
+site_url: https://lenzomj.github.io
+theme:
+  name: material

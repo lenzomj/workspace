@@ -1,4 +1,6 @@
 ansible
 selinux
 poetry
+mkdocs
+mkdocs-material
 pip2pi
