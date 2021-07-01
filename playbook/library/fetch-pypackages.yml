@@ -26,7 +26,7 @@
       - ( box_has_pip2pi )
       - ( 'pip' in box_fetch_allowlist )
     #command: "{{ _python }} -m pip download {{ _opts }} -r {{ _reqs.stat.path }}"
-    command: "pip2pi {{ box_mirror_uri }}/pypi.org/ -r {{ _reqs.stat.path }}"
+    command: "pip2pi {{ box_local_cache_path }}/pypi.org/ -r {{ _reqs.stat.path }}"
     #args:
     #  chdir: "{{ box_local_cache_path }}/pypi.org"
     vars:
