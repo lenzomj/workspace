@@ -4,7 +4,7 @@ box_local_path="${HOME}/.workspace-local"
 box_bootstrap_path="${box_local_path}/bootstrap"
 
 my_os=`awk -F= '/^NAME/{print $2}' /etc/os-release`
-base_apps=( "curl" "rsync" "git" "python3" "skopeo")
+base_apps=( "curl" "rsync" "git" "python3" "skopeo" "tmux")
 
 L="/lib:/lib64:/usr/lib:/usr/lib64"
 LD_LIBRARY_PATH="$L:${box_bootstrap_path}/usr/lib:${box_bootstrap_path}/usr/lib64"
@@ -40,6 +40,8 @@ if [[ "${my_os}" =~ "CentOS" ]]; then
       git --exec-path
     fi
   fi
+
+  python3 -m pip install --user -U pip
 
   if [[ ! -x "$(command -v ansible)" ]]; then
     python3 -m pip install --user ansible
