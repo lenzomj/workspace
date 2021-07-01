@@ -75,7 +75,9 @@
 
   - name: Checking for a workspace vault keyfile
     stat:
-      path: "{{ box_airgap_mount_path }}/vault/workspace.keys"
+      path: "{{ box_airgap_mount_path }}/vault/{{ _keyfile }}"
+    vars:
+      _keyfile: "{{ vault_keyfile | default('workspace.keys') }}"
     register: _kstat
 
   - name: Consolidating facts

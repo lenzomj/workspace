@@ -3,10 +3,10 @@
 
   - include: fetch.yml
 
-  - import_tasks: "{{ box_task_library }}/install-pypackages.yml"
-    vars:
-      a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"
-      a_virtualenv_path: "{{ box_local_path }}/devbox"
+  #- import_tasks: "{{ box_task_library }}/install-pypackages.yml"
+  #  vars:
+  #    a_requirements_file: "{{ role_path }}/files/pypi_packages.txt"
+  #    a_virtualenv_path: "{{ box_local_path }}/devbox"
 
   - import_tasks: "{{ box_task_library }}/clone-repositories.yml"
     vars:

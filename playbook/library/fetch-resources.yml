@@ -91,7 +91,7 @@
       - ( 'get' in box_fetch_allowlist )
     shell: |
       if [[ ! -f "{{ _dest }}" ]]; then
-        skopeo copy {{ _src }} \
+        skopeo --insecure-policy copy {{ _src }} \
         docker-archive:{{ _dest }}:{{ _rcs.resource }}
       fi
     args:
@@ -119,7 +119,7 @@
       - ( 'get' in box_fetch_allowlist )
     shell: |
       if [[ ! -f "{{ _dest }}" ]]; then
-        skopeo copy --src-creds '{{ _creds }}' {{ _src }} \
+        skopeo --insecure-policy copy --src-creds '{{ _creds }}' {{ _src }} \
         docker-archive:{{ _dest }}:{{ _rcs.resource }}
       fi
     args:

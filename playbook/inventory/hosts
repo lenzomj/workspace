@@ -1,11 +1,13 @@
 localhost
 pegasus
 galactica
+triton
 
 [localbox]
 localhost
 pegasus
 galactica
+triton
 
 [standalonebox]
 galactica

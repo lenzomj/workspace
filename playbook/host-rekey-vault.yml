@@ -20,7 +20,6 @@
         - "{{ box_local_roles_path }}"
       register: _role_paths
 
-      #TODO: Allow selection to rekey individual roles
     - name: Rekeying vault data required for other roles
       include_role:
         name: "{{ _role }}"
@@ -36,3 +35,10 @@
         - "files"
       loop_control:
         loop_var: _role_path
+
+    - name: Adding vault environment variables to .bashrc_local
+      blockinfile:
+        create: true
+        path: "{{ ansible_env.HOME }}/.bashrc_local"
+        marker: "# {mark} MANAGED BLOCK (common)"
+        block: 'export ANSIBLE_VAULT_PASSWORD_FILE="{{ box_vault_key_path }}"'
