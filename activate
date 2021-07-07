@@ -41,6 +41,14 @@ if [[ "${my_os}" =~ "CentOS" ]]; then
     fi
   fi
 
+  if [[ -z "$(command -v nvm)" ]]; then
+    PROFILE=/dev/null # nvm
+    curl -o- \
+      https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+  else
+    echo "$NVM_DIR"
+  fi
+
   python3 -m pip install --user -U pip
 
   if [[ ! -x "$(command -v ansible)" ]]; then
