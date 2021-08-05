@@ -56,14 +56,14 @@ sandbox:
 
     - resource: vagrant-box-ubuntu/bionic64
       upstream: "https://app.vagrantup.com/ubuntu/boxes/bionic64/versions/20201211.1.0/providers/virtualbox.box"
-      checksum: sha256:b214cbdad1118fbdd9341702a1dbcac0006bc8411d2ad189e5d947df9ba12f0e
+      checksum: sha256:81346cb5fd3d2c4a0e186ff9576546d264f25245e0c834b3730ea84f69afa188
       handlers: get and vagrant-add
       args:
         base_box: ubuntu/bionic64
 
     - resource: vagrant-box-ubuntu/focal64
       upstream: "https://app.vagrantup.com/ubuntu/boxes/focal64/versions/20201210.0.0/providers/virtualbox.box"
-      checksum: sha256:5313fd28ff5cd31ed8f87b14d748a422859ffcbd7562ad7ca76d10eb0d313be7
+      checksum: sha256:c23a83d560f1d4aec83a8d14462d07ac388d0094ed712004b2b9f85d37248377
       handlers: get and vagrant-add
       args:
         base_box: ubuntu/focal64
