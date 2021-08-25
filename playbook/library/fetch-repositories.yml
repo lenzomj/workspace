@@ -30,9 +30,10 @@
     expect:
       command: |
         {{ box_task_library }}/fetch-repository.sh {{ _repo }} {{ _dest }}
+      timeout: null
       responses:
-        Username: "{{ item.args.username }}"
-        Password: "{{ item.args.password }}"
+        (.*)Username(.*): "{{ item.args.username }}"
+        (.*)Password(.*): "{{ item.args.password }}"
     vars:
       _host: "{{ item.upstream | urlsplit('hostname') }}"
       _path: "{{ item.upstream | urlsplit('path') }}"
