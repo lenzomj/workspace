@@ -1,0 +1,82 @@
+---
+- name: Provision host by name
+  hosts: localhost
+  vars:
+    vmware_installer: "VMware-Horizon-Client-2106.1-8.3.1-18435609.x64.bundle"
+  tasks:
+    - name: Create temporary directory
+      tempfile:
+        state: directory
+        suffix: ansible
+      register: tmpdir
+
+    - name: Download VMWare Horizons Client installer for Linux
+      get_url:
+        url: "https://download3.vmware.com/software/view/viewclients/CART22FQ2/{{ vmware_installer }}"
+        dest: "{{ tmpdir.path }}/{{ vmware_installer }}"
+        checksum: sha256:5fc0ac3fc08f948065beb1212de8cc5d77817cdbc661f02c9a0f2f3c56e7fb85
+
+    - name: Make VMWare Horizons Client installer executable
+      file:
+        path: "{{ tmpdir.path }}/{{ vmware_installer }}"
+        mode: a+x
+
+    - name: Verify existing VMWare Horizons Client installation
+      become: yes
+      shell: |
+        ./{{ vmware_installer }} --list-components | grep {{ item }}
+      args:
+        chdir: "{{ tmpdir.path }}"
+      with_items:
+        - vmware-installer
+        - vmware-horizon-client 
+        - vmware-horizon-html5mmr
+        - vmware-horizon-pcoip 
+        - vmware-horizon-mmr
+        - vmware-horizon-rtav
+        - vmware-horizon-smartcard 
+      register: vmware_components
+      ignore_errors: true
+
+    - name: Install VMWare Horizons Client for Linux
+      become: yes
+      when: vmware_components is not defined
+      shell: |
+        env TERM=dumb VMWARE_EULAS_AGREED=yes \
+        ./{{ vmware_installer }} --console --regular \
+        --set-setting vmware-horizon-html5mmr html5mmrEnable yes \
+        --set-setting vmware-horizon-integrated-printing vmipEnable no \
+        --set-setting vmware-horizon-media-provider mediaproviderEnable no \
+        --set-setting vmware-horizon-teams-optimization teamsOptimizationEnable yes \
+        --set-setting vmware-horizon-mmr mmrEnable yes \
+        --set-setting vmware-horizon-rtav rtavEnable yes \
+        --set-setting vmware-horizon-scannerclient scannerEnable no \
+        --set-setting vmware-horizon-serialportclient serialportEnable no \
+        --set-setting vmware-horizon-smartcard smartcardEnable yes \
+        --set-setting vmware-horizon-tsdr tsdrEnable no \
+        --set-setting vmware-horizon-usb usbEnable no
+      args:
+        chdir: "{{ tmpdir.path }}"
+
+    - name: Install system packages for PKCS11 support
+      become: yes
+      package:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - opensc
+        - pcsc-tools
+        - nss-tools
+
+    - name: Create PKCS11 directory under /usr/lib/vmware/view
+      become: yes
+      file:
+        path: "/usr/lib/vmware/view/pkcs11"
+        state: directory
+
+    - name: Create symbolic link to PKCS11 library from /usr/lib/vmware/view
+      become: yes
+      file:
+        src: "/usr/lib64/pkcs11/opensc-pkcs11.so"
+        dest: "/usr/lib/vmware/view/pkcs11/libopenscpkcs11.so"
+        state: link
