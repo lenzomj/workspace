@@ -40,7 +40,7 @@
 
     - name: Install VMWare Horizons Client for Linux
       become: yes
-      when: vmware_components is not defined
+      when: vmware_components is failed
       shell: |
         env TERM=dumb VMWARE_EULAS_AGREED=yes \
         ./{{ vmware_installer }} --console --regular \
@@ -80,3 +80,9 @@
         src: "/usr/lib64/pkcs11/opensc-pkcs11.so"
         dest: "/usr/lib/vmware/view/pkcs11/libopenscpkcs11.so"
         state: link
+
+    - name: Configure PKCS11 module
+      blockinfile:
+        path: "/{{ ansible_env.HOME }}/.config/pkcs11/pkcs11.conf"
+        block: |
+          module: /usr/lib64/pkcs11/opensc-pkcs11.so
